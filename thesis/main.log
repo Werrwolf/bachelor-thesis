@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.4.11)  6 JUN 2024 15:41
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.4.11)  6 JUN 2024 15:58
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -40,8 +40,7 @@ If that doesn't work, type  X <return>  to quit.
 File: l3backend-pdftex.def 2024-03-14 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count196
 \l__pdf_internal_box=\box51
-)
-No file main.aux.
+) (./main.aux)
 \openout1 = `main.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 16.
@@ -58,6 +57,7 @@ LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 16.
 LaTeX Font Info:    ... okay on input line 16.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 16.
 LaTeX Font Info:    ... okay on input line 16.
+
 c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:22: Undefined control sequence.
 l.22 	{\usekomafont
                    
@@ -94,10 +94,10 @@ misspelled it (e.g., `\hobx'), type `I' and the correct
 spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
-c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:50: Undefined control sequence.
+c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:49: Undefined control sequence.
 <argument> ...mpdima \@parboxrestore \usekomafont 
                                                   Vorgelegt von:\\ \student ...
-l.50 }
+l.49 }
       
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -105,60 +105,22 @@ misspelled it (e.g., `\hobx'), type `I' and the correct
 spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
-c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:50: Undefined control sequence.
-<argument> ... \matrnr \par Stammnummer: \stammnr 
-                                                  \par \vspace {\baselineski...
-l.50 }
-      
-The control sequence at the end of the top line
-of your error message was never \def'ed. If you have
-misspelled it (e.g., `\hobx'), type `I' and the correct
-spelling (e.g., `I\hbox'). Otherwise just continue,
-and I'll forget about whatever was undefined.
-
-c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:61: Undefined control sequence.
+c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:59: Undefined control sequence.
 <argument> ...mpdima \@parboxrestore \usekomafont 
                                                   Prüfungsleitung:\\ \super...
-l.61 }}
-       
+l.59 }
+      
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
 misspelled it (e.g., `\hobx'), type `I' and the correct
 spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
-
-c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:61: Undefined control sequence.
-<argument> ...ung:\\ \supervisor \par \ifthenelse 
-                                                  {\equal {\secsupervisor }{...
-l.61 }}
-       
-The control sequence at the end of the top line
-of your error message was never \def'ed. If you have
-misspelled it (e.g., `\hobx'), type `I' and the correct
-spelling (e.g., `I\hbox'). Otherwise just continue,
-and I'll forget about whatever was undefined.
-
-c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:61: Undefined control sequence.
-<argument> ...supervisor \par \ifthenelse {\equal 
-                                                  {\secsupervisor }{}}{} {\v...
-l.61 }}
-       
-The control sequence at the end of the top line
-of your error message was never \def'ed. If you have
-misspelled it (e.g., `\hobx'), type `I' and the correct
-spelling (e.g., `I\hbox'). Otherwise just continue,
-and I'll forget about whatever was undefined.
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 61--61
-[]\OT1/cmr/m/n/12 Prof. Dr. Zweitpr^^?ufer
- []
 
 [1
 
 {c:/texlive/2024/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:66: Undefined control sequence.
-l.66 \chapter
+c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:64: Undefined control sequence.
+l.64 \chapter
              *{Abstract}
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -173,8 +135,8 @@ No file main.toc.
 [1
 
 ]
-c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:76: Undefined control sequence.
-l.76 \chapter
+c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:74: Undefined control sequence.
+l.74 \chapter
              {The first chapter}
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -183,13 +145,13 @@ spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
 
-LaTeX Warning: Reference `fig:myfig' on page 1 undefined on input line 108.
+LaTeX Warning: Reference `fig:myfig' on page 1 undefined on input line 106.
 
 [1
 
 ]
-c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:115: Undefined control sequence.
-l.115 	\includegraphics
+c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:113: Undefined control sequence.
+l.113 	\includegraphics
                        [width=.8\linewidth]{DelayComp.png}
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -197,19 +159,19 @@ misspelled it (e.g., `\hobx'), type `I' and the correct
 spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
-c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:115: Missing number, treated as zero.
+c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:113: Missing number, treated as zero.
 <to be read again> 
                    ]
-l.115 	\includegraphics[width=.8\linewidth]
+l.113 	\includegraphics[width=.8\linewidth]
                                            {DelayComp.png}
 A number should have been here; I inserted `0'.
 (If you can't figure out why I needed to see a number,
 look up `weird error' in the index to The TeXbook.)
 
-c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:115: Illegal unit of measure (pt inserted).
+c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:113: Illegal unit of measure (pt inserted).
 <to be read again> 
                    ]
-l.115 	\includegraphics[width=.8\linewidth]
+l.113 	\includegraphics[width=.8\linewidth]
                                            {DelayComp.png}
 Dimensions can be in units of em, ex, in, pt, pc,
 cm, mm, dd, cc, nd, nc, bp, or sp; but yours is a new one!
@@ -219,16 +181,16 @@ delete the erroneous units; e.g., type `2' to delete
 two letters. (See Chapter 27 of The TeXbook.)
 
 
-LaTeX Warning: Reference `tab:mytable' on page 2 undefined on input line 125.
+LaTeX Warning: Reference `tab:mytable' on page 2 undefined on input line 123.
 
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <12> on input line 130.
+(Font)              <12> on input line 128.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 130.
+(Font)              <8> on input line 128.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 130.
-c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:131: Undefined control sequence.
-l.131 	\toprule
+(Font)              <6> on input line 128.
+c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:129: Undefined control sequence.
+l.129 	\toprule
                
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -236,10 +198,10 @@ misspelled it (e.g., `\hobx'), type `I' and the correct
 spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
-c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:133: Undefined control sequence.
+c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:131: Undefined control sequence.
 <recently read> \midrule 
                          
-l.133 	\midrule
+l.131 	\midrule
                
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -247,10 +209,10 @@ misspelled it (e.g., `\hobx'), type `I' and the correct
 spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
-c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:136: Undefined control sequence.
+c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:134: Undefined control sequence.
 <recently read> \bottomrule 
                             
-l.136 	\bottomrule
+l.134 	\bottomrule
                   
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -259,15 +221,15 @@ spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
 
-LaTeX Warning: Citation `someref' on page 2 undefined on input line 145.
+LaTeX Warning: Citation `someref' on page 2 undefined on input line 143.
 
 
-Overfull \hbox (2.25653pt too wide) in paragraph at lines 144--149
+Overfull \hbox (2.25653pt too wide) in paragraph at lines 142--147
 \OT1/cmr/m/n/12 The bib-li-og-ra-phy is man-aged with Bib-TeX. Add en-tries to the [][]\OT1/cmtt/m/n/12 reference.bib
  []
 
-c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:151: Undefined control sequence.
-l.151 \chapter
+c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:149: Undefined control sequence.
+l.149 \chapter
               {More info}
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -275,8 +237,8 @@ misspelled it (e.g., `\hobx'), type `I' and the correct
 spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
-c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:154: Undefined control sequence.
-l.154 to be found here: \url
+c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:152: Undefined control sequence.
+l.152 to be found here: \url
                             {https://en.wikibooks.org/wiki/LaTeX}. Also, the
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -284,8 +246,8 @@ misspelled it (e.g., `\hobx'), type `I' and the correct
 spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
-c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:156: Undefined control sequence.
-l.156 \url
+c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:154: Undefined control sequence.
+l.154 \url
           {https://tex.stackexchange.com/}~\cite{stackexchange}.
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -294,7 +256,7 @@ spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
 
-LaTeX Warning: Citation `stackexchange' on page 2 undefined on input line 156.
+LaTeX Warning: Citation `stackexchange' on page 2 undefined on input line 154.
 
 No file main.bbl.
 [2] [3] (./main.aux)
@@ -312,14 +274,14 @@ LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
  ) 
 Here is how much of TeX's memory you used:
  498 strings out of 476020
- 9224 string characters out of 5791981
+ 9241 string characters out of 5791981
  1931496 words of memory out of 5000000
- 22693 multiletter control sequences out of 15000+600000
+ 22691 multiletter control sequences out of 15000+600000
  563827 words of font info for 55 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
  35i,8n,50p,238b,200s stack positions out of 10000i,1000n,20000p,200000b,200000s
  <c:/Users/q524745/.texlive2024/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1200.600pk><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmsl12.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
-Output written on main.pdf (5 pages, 80533 bytes).
+Output written on main.pdf (5 pages, 80514 bytes).
 PDF statistics:
  55 PDF objects out of 1000 (max. 8388607)
  34 compressed objects within 1 object stream

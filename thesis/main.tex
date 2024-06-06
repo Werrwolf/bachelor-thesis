@@ -2,8 +2,8 @@
 \newcommand{\student}{Carmen Werrlein}
 \newcommand{\matrnr}{780820}
 \newcommand{\submissiondate}{XX.\ Monat 20XX}
-\newcommand{\supervisor}{Prof.~Dr.~Rehrnert}
-\newcommand{\secsupervisor}{Prof.~Dr.~Zweitprüfer} % Unset this variable if no second supervisor is required
+\newcommand{\supervisor}{Prof. Dr. Rehrnert}
+\newcommand{\secsupervisor}{Prof. Dr. Zweitprüfer} % Unset this variable if no second supervisor is required
 \newcommand{\faculty}{Angewandte Informatik}
 
 \newcommand{\studies}{Bachelor Künstliche Intelligenz}
@@ -44,21 +44,19 @@ an der Technischen Hochschule Deggendorf\\
 	Vorgelegt von:\\
 	\student\\
 	Matrikelnummer: \matrnr\par
-	Stammnummer: \stammnr\par
 	\vspace{\baselineskip}
 	Am: \submissiondate\par
 }
 \hfill
 \parbox[t]{.4\textwidth}{\usekomafont
 Prüfungsleitung:\\
-\supervisor%
+\supervisor \\
+\secsupervisor
 
-\ifthenelse{\equal{\secsupervisor}{}}{}
-{%
 \vspace{\baselineskip}
 Ergänzende Prüfende:\\
 \secsupervisor%
-}}
+}
 \end{titlepage}
 \cleardoublepage\par
 
