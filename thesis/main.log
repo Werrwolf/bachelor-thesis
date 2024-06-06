@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.4.11)  6 JUN 2024 15:33
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.4.11)  6 JUN 2024 15:41
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -40,7 +40,8 @@ If that doesn't work, type  X <return>  to quit.
 File: l3backend-pdftex.def 2024-03-14 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count196
 \l__pdf_internal_box=\box51
-) (./main.aux)
+)
+No file main.aux.
 \openout1 = `main.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 16.
@@ -57,7 +58,6 @@ LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 16.
 LaTeX Font Info:    ... okay on input line 16.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 16.
 LaTeX Font Info:    ... okay on input line 16.
-
 c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex:22: Undefined control sequence.
 l.22 	{\usekomafont
                    
@@ -311,10 +311,10 @@ LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 
  ) 
 Here is how much of TeX's memory you used:
- 501 strings out of 476020
- 9263 string characters out of 5791981
+ 498 strings out of 476020
+ 9224 string characters out of 5791981
  1931496 words of memory out of 5000000
- 22694 multiletter control sequences out of 15000+600000
+ 22693 multiletter control sequences out of 15000+600000
  563827 words of font info for 55 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
  35i,8n,50p,238b,200s stack positions out of 10000i,1000n,20000p,200000b,200000s

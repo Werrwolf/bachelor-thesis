@@ -1,8 +1,8 @@
 preprocessed_logs/
 review_data.zip
 dokumentation_things/~$Roadmap Bachelor thesis.pptx
-main.aux
-main.fdb_latexmk
-main.fls
-main.log
-main.toc
+thesis/*.aux
+thesis/*.fdb_latexmk
+thesis/*.fls
+thesis/*.log
+thesis/*.toc
