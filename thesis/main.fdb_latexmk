@@ -7,7 +7,7 @@
   "main.bbl"
   "main.blg"
   (rewritten before read)
-["pdflatex"] 1717682317.83632 "c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex" "main.pdf" "main" 1717682318.45726 2
+["pdflatex"] 1717757666.49117 "c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex" "main.pdf" "main" 1717757667.37505 2
   "c:/Users/q524745/.texlive2024/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1200.600pk" 1717679995 14040 0a3e671e43f957352387d9169825c4bf ""
   "c:/Users/q524745/Documents/bachelor_thesis/thesis/main.tex" 1717682308 4873 1231943e5b9670379798bc5ed291068f ""
   "c:/texlive/2024/texmf-dist/fonts/tfm/jknappen/ec/tcrm1200.tfm" 1712818307 1536 74b7293ec3713bb7fdca8dd1bd1f469c ""
@@ -38,10 +38,10 @@
   "c:/texlive/2024/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1712923780 128827 ead865e488d0188787b2cc50c6968636 ""
   "c:/texlive/2024/texmf-var/web2c/pdftex/pdflatex.fmt" 1712818595 6862667 9bcfd7a80e5a3c8834eefacf6ffc8b52 ""
   "c:/texlive/2024/texmf.cnf" 1712818555 713 e69b156964470283e0530f5060668171 ""
-  "main.aux" 1717682318 1286 8a0146be63d6bff6ec7989ee9b15e096 "pdflatex"
+  "main.aux" 1717757666 1286 8a0146be63d6bff6ec7989ee9b15e096 "pdflatex"
   "main.bbl" 0 -1 0 "bibtex main"
   "main.tex" 1717682308 4873 1231943e5b9670379798bc5ed291068f ""
-  "main.toc" 1717682318 495 994580829162a4a4859886070e2dc59d "pdflatex"
+  "main.toc" 1717757666 495 994580829162a4a4859886070e2dc59d "pdflatex"
   (generated)
   "main.aux"
   "main.log"
