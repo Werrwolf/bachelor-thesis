@@ -1,8 +1,0 @@
-\contentsline {chapter}{Abstract}{i}{}%
-\contentsline {section}{\numberline {1}My first section}{1}{}%
-\contentsline {section}{\numberline {2}Some hints on layout}{1}{}%
-\contentsline {subsection}{\numberline {2.1}On sections and introductory texts}{1}{}%
-\contentsline {subsection}{\numberline {2.2}Lists}{1}{}%
-\contentsline {subsection}{\numberline {2.3}Graphics}{2}{}%
-\contentsline {subsection}{\numberline {2.4}Tables}{2}{}%
-\contentsline {subsection}{\numberline {2.5}Bibliography}{2}{}%
