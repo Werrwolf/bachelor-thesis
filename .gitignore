@@ -7,3 +7,5 @@ dokumentation_things/~$Roadmap Bachelor thesis.pptx
 *.log
 *.toc
 *.csv
+.venv
+.ipynb_checkpoints
