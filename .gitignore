@@ -9,3 +9,4 @@ dokumentation_things/~$Roadmap Bachelor thesis.pptx
 *.csv
 .venv
 .ipynb_checkpoints
+saved_weights.pt
