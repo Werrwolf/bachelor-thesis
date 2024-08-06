@@ -1,4 +1,5 @@
 preprocessed_logs/
+
 review_data.zip
 dokumentation_things/~$Roadmap Bachelor thesis.pptx
 *.aux
@@ -11,4 +12,5 @@ dokumentation_things/~$Roadmap Bachelor thesis.pptx
 .ipynb_checkpoints
 saved_weights.pt
 dokumentation_things/archive/saved_weights.pt
+dokumentation_things/ucc_tutorial
 logs/
