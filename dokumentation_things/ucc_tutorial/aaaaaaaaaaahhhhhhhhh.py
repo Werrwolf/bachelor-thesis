@@ -175,7 +175,7 @@ def check_requires_grad(model):
 config = {
     'model_name': "distilroberta-base",
     "n_labels": len(attributes), 
-    "bs": 512, 
+    "bs": 64, 
     "lr": 1.5e-6,
     "warmup": 0.2,
     "train_size": len(ucc_data_module.train_dataloader()), 
