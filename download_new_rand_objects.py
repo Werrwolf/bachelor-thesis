@@ -15,6 +15,8 @@ The python script can then be run like the following:
 
 ```
 python download_new_rand_objects.py --***REMOVED*** '***REMOVED***'  --***REMOVED*** '***REMOVED***' --bucket_name 'ddad-ci-ai-build-failure-extraction-test' --num_files 10
+
+To count files in a dir in Unix: ls -1 | wc -l
 ```
 
 Extra reading:
