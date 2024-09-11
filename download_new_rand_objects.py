@@ -45,21 +45,30 @@ def main(configuration):
     if not os.path.exists("logs"):
         os.makedirs("logs")
 
-    # List all objects in the bucket
-    response = s3.list_objects_v2(Bucket=configuration.bucket_name)
-    all_objects = [obj['Key'] for obj in response.get('Contents', [])]
+    actually_all_objects = []
+    start_after_key = ""
+    while True: 
+        response = s3.list_objects_v2(Bucket=configuration.bucket_name, StartAfter= start_after_key)
+        all_objects = [obj['Key'] for obj in response.get('Contents', [])]
+        if not all_objects:
+            logging.error("No more objects found in the bucket.")
+            break
+        start_after_key = all_objects[-1]
+        actually_all_objects.extend(all_objects)
 
-    if not all_objects:
-        logging.error("No objects found in the bucket.")
-        return
 
-    # Randomly choose a predefined amount of objects
+    # choose a predefined amount of objects
     chosen_objects = set()
+    object_iterator = iter(actually_all_objects)
     while len(chosen_objects) < configuration.num_files:
-        random_object = random.choice(all_objects)
-        local_file_path = os.path.join("logs", os.path.basename(random_object))
+        current_object = next(object_iterator, "end")
+        if current_object == "end":
+            logging.warning(f"only {len(chosen_objects)} objects found")
+            break
+        local_file_path = os.path.join("logs", os.path.basename(current_object))
         if not os.path.exists(local_file_path):
-            chosen_objects.add(random_object)
+            chosen_objects.add(current_object)
+
 
     # Download the chosen objects
     for obj in chosen_objects:
