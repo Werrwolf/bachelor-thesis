@@ -16,3 +16,4 @@ dokumentation_things/archive/saved_weights.pt
 dokumentation_things/ucc_tutorial/lightning_logs
 stats.prof
 .vscode
+dataset.pkl
