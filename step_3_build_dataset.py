@@ -1,19 +1,20 @@
 import json
 import re
 import os
-import textwrap
 import extract_build_failures.error_patterns as error_patterns
 import pandas as pd
 from collections import defaultdict
 
 INFRA_PATTERNS = error_patterns.INFRA_PATTERNS
 BUILD_PATTERNS = error_patterns.BUILD_PATTERNS
+LOG_DIRECTORY = 'preprocessed_logs'
+OUTPUT_DIRECTORY = 'datasets'
+
 
 def restructure_patterns(patterns):
     """
     Restructures the input patterns dictionary to a more structured format.
     """
-    print(" reached: restructure_patterns")
     restructured_patterns = {}
     for pattern_type, subpatterns in patterns.items():
         if isinstance(subpatterns, (set, list)):
@@ -34,7 +35,6 @@ def compile_patterns(patterns_dict):
     """
     Compiles the restructured patterns dictionary into a dictionary of compiled regex patterns.
     """
-    print(" reached: compiled_patterns")
     compiled_patterns = {}
     for main_category, subpatterns in patterns_dict.items():
         for sub_category, patterns in subpatterns.items():
@@ -43,6 +43,9 @@ def compile_patterns(patterns_dict):
 
 
 def purge_log_lines(log_entries, cutoff_intervall = 1000):
+    """
+    Purges log lines to keep only the start and end intervals if the log is too long.
+    """
     if len(log_entries) < 2*cutoff_intervall:
         return log_entries
     start_intervall = log_entries[:cutoff_intervall]
@@ -51,7 +54,6 @@ def purge_log_lines(log_entries, cutoff_intervall = 1000):
 
 
 def check_log_entry(log_entries, compiled_patterns):
-    print("reached: check log entry")
     purged_log_entries = purge_log_lines(log_entries, 1000)
     matches_list = []
     for log_entry in purged_log_entries:
@@ -63,102 +65,62 @@ def check_log_entry(log_entries, compiled_patterns):
     return matches_list
 
 
-def process_single_file(file_path, compiled_patterns):
+def process_single_file(directory_path, filename, compiled_patterns):
     """
     Processes a single log file and returns the summary, task matches, and dataset.
     """
-    print(" reached: process_single_log_file")
-    summary = {'tasks_summary': {}}
-    task_matches = {}
     dataset = []
-    checked_logs = 0 # TODO fix this, assign prior
+    task_matches = {}
+    file_path = os.path.join(directory_path, filename)
+
     with open(file_path, 'r', encoding='utf-8') as file:
         log_entries = json.load(file)
         for log in log_entries:
             task_id = log.get('id', 'No ID provided')
             name = log.get('name', 'No task name provided')
             task_key = f"{name} (ID: {task_id})"
-            summary['tasks_summary'].setdefault(task_key, 0)
-            summary['tasks_summary'][task_key] += 1
 
             stdout_text = "\n".join(log.get('stdout_lines', []))
             matches_list = check_log_entry(log.get('stdout_lines', []), compiled_patterns)
-            checked_logs +=1
-            if checked_logs % 100 == 0 and checked_logs>= 100:
-                print(checked_logs)
             if matches_list:
                 task_matches.setdefault(task_key, defaultdict(set))
                 for match in matches_list:
-                    # benennung angleichen, is main & subcategory TODO
                     error_cluster, error_type, pattern = match
                     task_matches[task_key][(error_cluster, error_type, pattern)].add(stdout_text)
                 for (error_cluster, error_type, pattern), log_entries in task_matches[task_key].items():
                     dataset.append((task_id, "\n".join(log_entries), error_cluster, error_type))
+    
+    output_file_name = os.path.splitext(filename)[0] + ".csv"
+    output_path = os.path.join("datasets", output_file_name)
+    dataset_df = pd.DataFrame(dataset, columns=['task_id', 'log_line', 'main_category', 'sub_category'])
+    return output_path, output_file_name, dataset_df
 
-    return summary, task_matches, dataset, checked_logs
 
-def process_log_files(directory_path, compiled_patterns):
+def process_all_files(directory_path, compiled_patterns):
     """
-    Processes all log files in the given directory and returns the summary, file matches, and dataset.
+    Processes all log files in the given directory, saving each one as a separate .csv in "datasets".
+    Skips processing if the corresponding file already exists.
     """
-    print(" reached: format_log_files")
-    final_summary = {'tasks_summary': {}}
-    file_matches = {}
-    all_dataset = []
+    files = [f for f in os.listdir(directory_path) if f.endswith('.json')]
+    os.makedirs(OUTPUT_DIRECTORY, exist_ok=True) 
 
-    for filename in filter(lambda f: f.endswith('.json'), os.listdir(directory_path)):
-        file_path = os.path.join(directory_path, filename)
-        summary, task_matches, dataset, checked_logs = process_single_file(file_path, compiled_patterns)
+    for file in files:
+        output_file_name = os.path.splitext(file)[0] + ".csv"
+        output_path = os.path.join(OUTPUT_DIRECTORY, output_file_name)
+        
+        if os.path.exists(output_path):
+            print(f"Skipping {file}, corresponding CSV already exists.")
+            continue
+        
+        _, output_file_name, dataset_df = process_single_file(directory_path, file, compiled_patterns)
+        dataset_df.to_csv(output_path, index=False)
+        print(f"Processed and saved: {output_file_name}")
 
-        for task_key, count in summary['tasks_summary'].items():
-            final_summary['tasks_summary'].setdefault(task_key, 0)
-            final_summary['tasks_summary'][task_key] += count
-
-        if task_matches:
-            file_matches[file_path] = task_matches
-            
-        all_dataset.extend(dataset)
-
-    return all_dataset, checked_logs
-
-
-
-def format_summary_to_screen_width(summary, terminal_width=150):
-    """
-    Formats the summary dictionary to fit the given terminal width.
-    """
-    print(" reached: format_summary_to_screeen")
-    formatted_summary = ""
-    for key, value in summary.items():
-        if isinstance(value, dict):
-            formatted_summary += f"{key}:\n"
-            for sub_key, sub_value in value.items():
-                wrapped_sub_value = textwrap.fill(str(sub_value), terminal_width - 4)
-                formatted_summary += f"  {sub_key}: {wrapped_sub_value}\n"
-        else:
-            wrapped_value = textwrap.fill(str(value), terminal_width)
-            formatted_summary += f"{key}: {wrapped_value}\n"
-        formatted_summary += "-" * terminal_width + "\n"
-    return formatted_summary
-
-def format_file_matches(file_matches, terminal_width=150):
-    """
-    Formats the file matches dictionary to fit the given terminal width.
-    """
-    print(" reached: format_file_matches")
-    formatted_matches = ""
-    for file_path, tasks in file_matches.items():
-        formatted_matches += f"File: {file_path}\n"
-        for task_key, matches in tasks.items():
-            formatted_matches += f"  Task: {task_key}\n"
-            for (error_cluster, error_type, pattern), log_entries in matches.items():
-                formatted_matches += f"    Error Cluster: {error_cluster}, Error Type: {error_type or error_cluster}, Pattern: {pattern}\n"
-        formatted_matches += "-" * terminal_width + "\n"
-    return formatted_matches
 
 def main():
-    # Restructure the patterns first
-    print(" reached: main")
+    """
+    Main function to restructure, compile patterns and process log files.
+    """
     restructured_infra_patterns = restructure_patterns(INFRA_PATTERNS)
     restructured_build_patterns = restructure_patterns(BUILD_PATTERNS)
 
@@ -170,15 +132,10 @@ def main():
     all_compiled_patterns = {**compiled_infra_patterns, **compiled_build_patterns}
 
     # Process log files
-    directory_path = 'preprocessed_logs'
-    dataset, checked_logs = process_log_files(directory_path, all_compiled_patterns)
+    process_all_files(LOG_DIRECTORY, all_compiled_patterns)
 
-    # Save the dataset
-    dataset_df = pd.DataFrame(dataset, columns=['task_id', 'log_entry', 'error_cluster', 'error_type'])
-    dataset_df.to_csv('labeled_dev_dataset.csv', index=True)
-    # print(dataset)
-    return dataset_df, checked_logs
+    print("Processing complete")
 
-dataset, checked_logs = main()
-
-print("done")
+# Run the main function
+if __name__ == '__main__':
+    main()
