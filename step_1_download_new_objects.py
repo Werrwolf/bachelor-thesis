@@ -27,7 +27,6 @@ Extra reading:
 import argparse
 import boto3
 import os
-import random
 import logging
 
 # Configure logging

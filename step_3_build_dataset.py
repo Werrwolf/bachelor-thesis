@@ -73,22 +73,29 @@ def process_single_file(directory_path, filename, compiled_patterns):
     task_matches = {}
     file_path = os.path.join(directory_path, filename)
 
-    with open(file_path, 'r', encoding='utf-8') as file:
-        log_entries = json.load(file)
-        for log in log_entries:
-            task_id = log.get('id', 'No ID provided')
-            name = log.get('name', 'No task name provided')
-            task_key = f"{name} (ID: {task_id})"
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            log_entries = json.load(file)
+            for log in log_entries:
+                task_id = log.get('id', 'No ID provided')
+                name = log.get('name', 'No task name provided')
+                task_key = f"{name} (ID: {task_id})"
 
-            stdout_text = "\n".join(log.get('stdout_lines', []))
-            matches_list = check_log_entry(log.get('stdout_lines', []), compiled_patterns)
-            if matches_list:
-                task_matches.setdefault(task_key, defaultdict(set))
-                for match in matches_list:
-                    error_cluster, error_type, pattern = match
-                    task_matches[task_key][(error_cluster, error_type, pattern)].add(stdout_text)
-                for (error_cluster, error_type, pattern), log_entries in task_matches[task_key].items():
-                    dataset.append((task_id, "\n".join(log_entries), error_cluster, error_type))
+                stdout_text = "\n".join(log.get('stdout_lines', []))
+                matches_list = check_log_entry(log.get('stdout_lines', []), compiled_patterns)
+                if matches_list:
+                    task_matches.setdefault(task_key, defaultdict(set))
+                    for match in matches_list:
+                        error_cluster, error_type, pattern = match
+                        task_matches[task_key][(error_cluster, error_type, pattern)].add(stdout_text)
+                    for (error_cluster, error_type, pattern), log_entries in task_matches[task_key].items():
+                        dataset.append((task_id, "\n".join(log_entries), error_cluster, error_type))
+    except json.JSONDecodeError as e:
+        print(f"Error decoding JSON file {filename}: {e}")
+        with open('skipped_logs.txt',"a") as skipped_list:
+            skipped_list.write("\n")
+            skipped_list.write(filename)
+        return None, None, None
     
     output_file_name = os.path.splitext(filename)[0] + ".csv"
     output_path = os.path.join("datasets", output_file_name)
@@ -112,9 +119,10 @@ def process_all_files(directory_path, compiled_patterns):
             print(f"Skipping {file}, corresponding CSV already exists.")
             continue
         
-        _, output_file_name, dataset_df = process_single_file(directory_path, file, compiled_patterns)
-        dataset_df.to_csv(output_path, index=False)
-        print(f"Processed and saved: {output_file_name}")
+        output_path, output_file_name, dataset_df = process_single_file(directory_path, file, compiled_patterns)
+        if dataset_df is not None:  # Check if dataset_df is not None before saving
+            dataset_df.to_csv(output_path, index=False)
+            print(f"Processed and saved: {output_file_name}")
 
 
 def main():
