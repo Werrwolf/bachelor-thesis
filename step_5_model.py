@@ -84,8 +84,8 @@ def streaming_load_data_files (dataset_names, dir_path):
             yield example
 
 
-def tokenize_something(example):
-    return tokenizer(example["log_line"], truncation=True, padding=True, clean_up_tokenization_spaces=False)
+# def tokenize_something(example):
+#     return tokenizer(example["log_line"], truncation=True, padding=True, clean_up_tokenization_spaces=False)
 
 
 class CustomDataset(Dataset):
@@ -226,7 +226,6 @@ def train_model(model, data_module, config):
 
         print(f"Epoch {epoch+1}, Train Loss: {train_loss:.4f}, Validation Loss: {val_loss:.4f}")
         scheduler.step()
-
     return model
 
 def predict_on_testdata(model, data_module):
@@ -261,11 +260,11 @@ data_module.setup()
 n_labels=len(data_module.label_mapping)
 model = RoBERTaClassifier(n_labels=config["n_labels"])
 
-# Train model
-trained_model = train_model(model, data_module, config)
+# # Train model
+# trained_model = train_model(model, data_module, config)
 
-# Predict on test set
-predictions = predict_on_testdata(trained_model, data_module)
-# print(f"Predictions on test set: {predictions}")
+# # Predict on test set
+# predictions = predict_on_testdata(trained_model, data_module)
+# # print(f"Predictions on test set: {predictions}")
 
-print("Training and Predictions completed")
+# print("Training and Predictions completed")
