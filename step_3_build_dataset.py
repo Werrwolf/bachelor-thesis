@@ -30,16 +30,7 @@ def restructure_patterns(patterns):
             raise ValueError(f"Unexpected type for subpatterns: {type(subpatterns)}")
     return restructured_patterns
 
-
-def compile_patterns(patterns_dict):
-    """
-    Compiles the restructured patterns dictionary into a dictionary of compiled regex patterns.
-    """
-    compiled_patterns = {}
-    for main_category, subpatterns in patterns_dict.items():
-        for sub_category, patterns in subpatterns.items():
-            compiled_patterns.setdefault((main_category, sub_category), []).extend([re.compile(pattern) for pattern in patterns])
-    return compiled_patterns
+game 
 
 
 def purge_log_lines(log_entries, cutoff_intervall = 1000):
@@ -97,11 +88,20 @@ def process_single_file(directory_path, filename, compiled_patterns):
             skipped_list.write(filename)
         return None, None, None
     
-    output_file_name = os.path.splitext(filename)[0] + ".csv"
-    output_path = os.path.join("datasets", output_file_name)
-    dataset_df = pd.DataFrame(dataset, columns=['task_id', 'log_line', 'main_category', 'sub_category'])
-    return output_path, output_file_name, dataset_df
+    if not dataset:
+        with open('no_matches_list.txt', "a") as skipped_list:
+            skipped_list.write(f"{filename}\n")
+        return None, None, None
+    
+    if dataset:
+        output_file_name = os.path.splitext(filename)[0] + ".csv"
+        output_path = os.path.join("datasets", output_file_name)
+        dataset_df = pd.DataFrame(dataset, columns=['task_id', 'log_line', 'main_category', 'sub_category'])
+        return output_path, output_file_name, dataset_df
 
+def initialize_no_matches_file():
+    with open ("no_matches_list.txt", "w") as file : 
+        file.write("# This File lists all logs where no label could be applied.\n# This could be because the match was in the purged part or no match was found at all (indicates a unknown failure cause).\n\n") 
 
 def process_all_files(directory_path, compiled_patterns):
     """
@@ -111,18 +111,25 @@ def process_all_files(directory_path, compiled_patterns):
     files = [f for f in os.listdir(directory_path) if f.endswith('.json')]
     os.makedirs(OUTPUT_DIRECTORY, exist_ok=True) 
 
+    saved_files = 0
+    skipped_files = 0
+
     for file in files:
         output_file_name = os.path.splitext(file)[0] + ".csv"
         output_path = os.path.join(OUTPUT_DIRECTORY, output_file_name)
         
         if os.path.exists(output_path):
-            print(f"Skipping {file}, corresponding CSV already exists.")
+            skipped_files += 1
+            # print(f"Skipping {file}, corresponding CSV already exists.")
             continue
         
         output_path, output_file_name, dataset_df = process_single_file(directory_path, file, compiled_patterns)
         if dataset_df is not None:  # Check if dataset_df is not None before saving
             dataset_df.to_csv(output_path, index=False)
-            print(f"Processed and saved: {output_file_name}")
+            saved_files +=1
+            # print(f"Processed and saved: {output_file_name}")
+    
+    return saved_files, skipped_files
 
 
 def main():
@@ -140,9 +147,10 @@ def main():
     all_compiled_patterns = {**compiled_infra_patterns, **compiled_build_patterns}
 
     # Process log files
-    process_all_files(LOG_DIRECTORY, all_compiled_patterns)
+    initialize_no_matches_file()
+    saved_files, skipped_files = process_all_files(LOG_DIRECTORY, all_compiled_patterns)
 
-    print("Processing complete")
+    print(f"Processing complete. Newly saved files: {saved_files}. Skipped {skipped_files} files, because they already existed.")
 
 # Run the main function
 if __name__ == '__main__':

@@ -2,26 +2,14 @@
 A simple script to download a specified object from an S3 bucket.
 It requires the boto3 python library to be present in the current environment.
 Any version should suffice.
-
 To install the library in a venv in a Unix environment, the following commands can be run:
-
-```
-$ python3 -m venv .venv
-$ source .venv/bin/activate
-$ pip3 install boto3
-```
-
+    $ python3 -m venv .venv
+    $ source .venv/bin/activate
+    $ pip3 install boto3
 The python script can then be run like the following:
-
-```
 python download_new_rand_objects.py --***REMOVED*** '***REMOVED***'  --***REMOVED*** '***REMOVED***' --bucket_name 'ddad-ci-ai-build-failure-extraction-test' --num_files 10
-
-To count files in a dir in Unix: ls -1 | wc -l
-```
-
-Extra reading:
-- https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-example-download-file.html
-- https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/download_file.html
+To count files in a dir in Unix: 
+    ls -1 | wc -l
 """
 
 import argparse
@@ -44,6 +32,7 @@ def main(configuration):
     if not os.path.exists("logs"):
         os.makedirs("logs")
 
+    # Generating a list of all objects in increments of 1000 (list_objects_v2 returns 1000 max.)
     actually_all_objects = []
     start_after_key = ""
     while True: 
@@ -56,24 +45,27 @@ def main(configuration):
         actually_all_objects.extend(all_objects)
 
 
-    # choose a predefined amount of objects
+    # Choosing defined number of objects from actually_all_objects
     chosen_objects = set()
     object_iterator = iter(actually_all_objects)
     while len(chosen_objects) < configuration.num_files:
         current_object = next(object_iterator, "end")
+        # If not enough new objects in bucket:
         if current_object == "end":
             logging.warning(f"only {len(chosen_objects)} objects found")
             break
-        local_file_path = os.path.join("logs", os.path.basename(current_object))
-        if not os.path.exists(local_file_path):
+        # Does log exist in datasets or preprocessed already? (Yes: skip, No: add to chosen_objects)
+        preprocessed_filepath = os.path.join("preprocessed_logs", os.path.basename(current_object))
+        datasets_filepath = os.path.join("datasets", os.path.basename(current_object))
+        if not os.path.exists(preprocessed_filepath) or os.path.exists(datasets_filepath):          # TODO: check once if path correct split/joined!
             chosen_objects.add(current_object)
 
 
-    # Download the chosen objects
+    # Download chosen_objects
     for obj in chosen_objects:
-        local_file_path = os.path.join("logs", os.path.basename(obj))
-        logging.info(f"Downloading {obj} to {local_file_path}")
-        s3.download_file(configuration.bucket_name, obj, local_file_path)
+        preprocessed_filepath = os.path.join("logs", os.path.basename(obj))
+        logging.info(f"Downloading {obj} to {preprocessed_filepath}")
+        s3.download_file(configuration.bucket_name, obj, preprocessed_filepath)
 
 
 def parse_input_arguments():
