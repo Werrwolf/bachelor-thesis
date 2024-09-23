@@ -54,10 +54,19 @@ def main(configuration):
         if current_object == "end":
             logging.warning(f"only {len(chosen_objects)} objects found")
             break
+
+
+        # Building filenames for the check ([0] = extract without extension)
+        base_filename = os.path.splitext(os.path.basename(current_object))[0]
+        preprocessed_filepath = os.path.join("preprocessed_logs", f"{base_filename}_cropped.json")
+        datasets_filepath = os.path.join("datasets", f"{base_filename}_cropped.csv")
         # Does log exist in datasets or preprocessed already? (Yes: skip, No: add to chosen_objects)
-        preprocessed_filepath = os.path.join("preprocessed_logs", os.path.basename(current_object))
-        datasets_filepath = os.path.join("datasets", os.path.basename(current_object))
-        if not os.path.exists(preprocessed_filepath) or os.path.exists(datasets_filepath):          # TODO: check once if path correct split/joined!
+        if not os.path.exists(preprocessed_filepath) or os.path.exists(datasets_filepath):          # TODO: check once if path correct split/joined! -> Done i think!
+                                                                                                            # -> No, datasets need to end in _cropped.csv
+                                                                                                            # -> need to end in _cropped.json for preprocessed
+                                                                                                            # alternative: check for partial match, but could be dangerous
+                                                                                                            # 'datasets/0000595bdf9db15a5679c0268c4d7311105336398528c42e2263b7d3935c8922__job-output.json' or
+                                                                                                            # 'datasets/0000595bdf9db15a5679c0268c4d7311105336398528c42e2263b7d3935c8922__job-output.csv'
             chosen_objects.add(current_object)
 
 
@@ -66,6 +75,7 @@ def main(configuration):
         preprocessed_filepath = os.path.join("logs", os.path.basename(obj))
         logging.info(f"Downloading {obj} to {preprocessed_filepath}")
         s3.download_file(configuration.bucket_name, obj, preprocessed_filepath)
+    print(f"Finished downloading {len(chosen_objects)} new logs")
 
 
 def parse_input_arguments():
