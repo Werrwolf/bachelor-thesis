@@ -61,12 +61,7 @@ def main(configuration):
         preprocessed_filepath = os.path.join("preprocessed_logs", f"{base_filename}_cropped.json")
         datasets_filepath = os.path.join("datasets", f"{base_filename}_cropped.csv")
         # Does log exist in datasets or preprocessed already? (Yes: skip, No: add to chosen_objects)
-        if not os.path.exists(preprocessed_filepath) or os.path.exists(datasets_filepath):          # TODO: check once if path correct split/joined! -> Done i think!
-                                                                                                            # -> No, datasets need to end in _cropped.csv
-                                                                                                            # -> need to end in _cropped.json for preprocessed
-                                                                                                            # alternative: check for partial match, but could be dangerous
-                                                                                                            # 'datasets/0000595bdf9db15a5679c0268c4d7311105336398528c42e2263b7d3935c8922__job-output.json' or
-                                                                                                            # 'datasets/0000595bdf9db15a5679c0268c4d7311105336398528c42e2263b7d3935c8922__job-output.csv'
+        if not os.path.exists(preprocessed_filepath) or os.path.exists(datasets_filepath):
             chosen_objects.add(current_object)
 
 
