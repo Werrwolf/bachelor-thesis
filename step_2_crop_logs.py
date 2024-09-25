@@ -19,7 +19,6 @@ def decide_file_handling(blacklist):
     # Load the blacklist.txt
     with open(blacklist, 'r') as f:
         blacklist = f.read().splitlines()
-    # debug_counter=0
     files_to_process = []
     
     # check all files
@@ -31,21 +30,27 @@ def decide_file_handling(blacklist):
         datasets_filepath = os.path.join(DATASET_DIR, f"{base_filename}_cropped.csv")        
         
         if os.path.isfile(source_filepath):
-            
             # does log already exist in any of the other folders?
-            if (os.path.exists(datasets_filepath) or file in blacklist or os.path.exists(preprocessed_filepath)):
-                # os.unlink(source_filepath)  TODO
-                print(f"Deleted log file {source_filepath} as the log was either processed or blacklisted previously")
-
+            # if (os.path.exists(datasets_filepath) or file in blacklist or os.path.exists(preprocessed_filepath)):
+            #     os.remove(source_filepath)
+            #     print(f"Deleted log file {source_filepath} as the log was either processed or blacklisted previously")
+            
+            if os.path.exists(datasets_filepath):
+                print(f"{source_filepath} was found in 'datasets'.")
+                os.remove(source_filepath)
+            elif os.path.exists(preprocessed_filepath):
+                print(f"{source_filepath} was found in 'preprocessed_logs'.")
+                os.remove(source_filepath)
+            elif file in blacklist:
+                print(f"{source_filepath} was found in 'blacklist'.")
+                os.remove(source_filepath)
             # => the file needs to be processed
             else:
                 print(f"{source_filepath} will be processeed")
                 files_to_process.append(file)
-                # debug_counter += 1
         # catching errors
         else: 
             print(f" There was an issue opening: {source_filepath}")
-    # print(f"Files to process: {debug_counter}")
     return files_to_process
 
 
@@ -71,7 +76,7 @@ def extract_error_info_from_file(filenameWithExtension):
                 for task in play.get('tasks', []):
                     task_info = task.get('task', {})
                     task_id = task_info.get('id', 'No ID provided')
-                    for host_info in task.get('hosts', {}).items():
+                    for node, host_info in task.get('hosts', {}).items():
                         if host_info.get('failed'):
                             error_info = {
                                 'stdout_lines': host_info.get('stdout_lines', []),
@@ -96,14 +101,16 @@ def save_error_info(target_dir):
     os.makedirs(target_dir, exist_ok=True)
     files_to_process = decide_file_handling(BLACKLIST)
     for filename in files_to_process:
-        file_path = os.path.join(filename)
-        error_info = extract_error_info_from_file(file_path)
+        error_info = extract_error_info_from_file(filename)
         all_error_info.extend(error_info)
         if error_info:
             new_filename = f"{os.path.splitext(filename)[0]}_cropped.json"
             new_file_path = os.path.join(target_dir, new_filename)
             with open(new_file_path, 'w', encoding='utf-8') as new_file:
                 json.dump(error_info, new_file, indent=4)
+            old_path = os.path.join('logs', filename)
+            # print(old_path)
+            os.remove(old_path)
     return all_error_info
 
 

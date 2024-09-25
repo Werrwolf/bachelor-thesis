@@ -1,27 +1,33 @@
 import json
 import re
-import shutil
 import os
 import pandas as pd
 from collections import defaultdict
 
+
 INPUT_DIR = 'preprocessed_logs'
 OUTPUT_DIRECTORY = 'datasets'
+BLACKLIST = 'blacklist.txt'
 
 def load_pattern(file_path):
     with open(file_path, 'r') as file:
         return json.load(file)
 
 
-def compile_patterns(all_patterns):
+def compile_patterns(patterns):
     """	
     Compiles the restructured patterns dictionary into a dictionary of compiled regex patterns.	
     """	
     compiled_patterns = {}	
-    for main_category, subpatterns in all_patterns.items():	
+    for main_category, subpatterns in patterns.items():	
         for sub_category, patterns in subpatterns.items():	
             compiled_patterns.setdefault((main_category, sub_category), []).extend([re.compile(pattern) for pattern in patterns])	
     return compiled_patterns
+
+
+def load_blacklist_file():
+    with open (BLACKLIST, "a") as file : 
+        return file 
 
 
 def purge_log_lines(log_entries, cutoff_intervall = 1000):
@@ -35,7 +41,7 @@ def purge_log_lines(log_entries, cutoff_intervall = 1000):
     return start_intervall + end_intervall
 
 
-def check_log_entry(log_entries, compiled_patterns):
+def check_purged_log(log_entries, compiled_patterns):
     purged_log_entries = purge_log_lines(log_entries, 1000)
     matches_list = []
     for log_entry in purged_log_entries:
@@ -47,9 +53,20 @@ def check_log_entry(log_entries, compiled_patterns):
     return matches_list
 
 
+def check_full_log(log_entries, compiled_patterns):
+    matches_list = []
+    for log_entry in log_entries:
+        for (main_category, sub_category), regex_list in compiled_patterns.items():
+            for pattern in regex_list:
+                match = pattern.search(log_entry)
+                if match:
+                    matches_list.append((main_category, sub_category, match))
+    return matches_list
+
+
 def process_single_file(directory_path, filename, compiled_patterns):
     """
-    Processes a single log file and returns the summary, task matches, and dataset.
+    Processes a single log file and returns a dateset with task_id, log entries, main_category, sub_category.
     """
     dataset = []
     task_matches = {}
@@ -64,7 +81,9 @@ def process_single_file(directory_path, filename, compiled_patterns):
                 task_key = f"{name} (ID: {task_id})"
 
                 stdout_text = "\n".join(log.get('stdout_lines', []))
-                matches_list = check_log_entry(log.get('stdout_lines', []), compiled_patterns)
+
+                # check shortened log version, returns 'none' if no match found in short version
+                matches_list = check_purged_log(log.get('stdout_lines', []), compiled_patterns)
                 if matches_list:
                     task_matches.setdefault(task_key, defaultdict(set))
                     for match in matches_list:
@@ -72,16 +91,30 @@ def process_single_file(directory_path, filename, compiled_patterns):
                         task_matches[task_key][(main_category, sub_category, pattern)].add(stdout_text)
                     for (main_category, sub_category, pattern), log_entries in task_matches[task_key].items():
                         dataset.append((task_id, "\n".join(log_entries), main_category, sub_category))
-    except json.JSONDecodeError as e:
-        print(f"Error decoding JSON file {filename}: {e}")
-        with open('skipped_logs.txt',"a") as skipped_list:
-            skipped_list.write("\n")
-            skipped_list.write(filename)
-        return None, None, None
-    
-    if not dataset:
-        no_matches_dir = "no_matches"
-        shutil.move(file_path, os.path.join(no_matches_dir, filename))
+                else: 
+                    # check full version
+                    matches_list = check_full_log(task_key, defaultdict(set))
+
+                    if matches_list:
+                        task_matches.setdefault(task_key, defaultdict(set))
+                        for match in matches_list:
+                            main_category, sub_category, pattern = match
+                            task_matches[task_key][(main_category, sub_category, pattern)].add(stdout_text)
+                        for (main_category, sub_category, pattern), log_entries in task_matches[task_key].items():
+                            dataset.append((task_id, "\n".join(log_entries), main_category, sub_category))
+                    # still no matches? Theres a unknown error, label as such and proceed
+                    else:
+                        isthisadict ={}
+                        isthisadict.setdefault(task_id, defaultdict(set))
+                        for log_entry in log_entries:
+                            dataset.append((task_id, stdout_text, "Unknown error", "Unknown error"))
+
+    except json.JSONDecodeError:
+        with open(BLACKLIST, 'a') as blacklist:
+            blacklist.write("\n")
+            blacklist.write(filename)
+        os.remove(file_path)
+        print(f"Error decoding JSON file {filename}, File has been deleted and added to the blacklist.")
         return None, None, None
     
     if dataset:
@@ -89,12 +122,10 @@ def process_single_file(directory_path, filename, compiled_patterns):
         output_path = os.path.join("datasets", output_file_name)
         dataset_df = pd.DataFrame(dataset, columns=['task_id', 'log_line', 'main_category', 'sub_category'])
         return output_path, output_file_name, dataset_df
-
-
-def initialize_no_matches_file():
-    with open ("no_matches_list.txt", "w") as file : 
-        file.write("# This File lists all logs where no label could be applied.\n# This could be because the match was in the purged part or no match was found at all (indicates a unknown failure cause).\n\n") 
-
+    
+    else:
+        return None, None, None
+    
 
 def process_all_files(directory_path, compiled_patterns):
     """
@@ -102,28 +133,26 @@ def process_all_files(directory_path, compiled_patterns):
     Skips processing if the corresponding file already exists.
     """
     files = [f for f in os.listdir(directory_path) if f.endswith('.json')]
-    # no_match_dir = "no_matches"
-    saved_files = 0
-    skipped_files = 0
 
     for file in files:
         output_file_name = os.path.splitext(file)[0] + ".csv"
         output_path = os.path.join(OUTPUT_DIRECTORY, output_file_name)
         file_path = os.path.join(directory_path, file)
-        
-        if os.path.exists(output_path):
-            skipped_files += 1
-            os.remove(file_path)
-            # print(f"Skipping {file}, corresponding CSV already exists.")
-            continue
-        # Process file
-        output_path, output_file_name, dataset_df = process_single_file(directory_path, file, compiled_patterns)
-        if dataset_df is not None:  # Check if dataset_df is not None before saving
-            dataset_df.to_csv(output_path, index=False)
-            saved_files +=1
-            os.remove(file_path)
-            # print(f"Processed and saved: {output_file_name}")
-    return saved_files, skipped_files
+        with open(BLACKLIST, 'r') as blacklist:
+            if os.path.exists(output_path) or file in blacklist: 
+                os.remove(file_path)
+                print(f"Deleted {file}, corresponding CSV dataset already exists or log was blacklisted previously.")
+                continue
+                
+            # Process file
+            output_path, output_file_name, dataset_df = process_single_file(directory_path, file, compiled_patterns)
+            if dataset_df is not None:
+                dataset_df.to_csv(output_path, index=False)
+                os.remove(file_path)
+                print(f"Processed and saved: {output_file_name}")
+            else:
+                print('dataset_df is None')
+    return 
 
 
 def main():
@@ -135,10 +164,7 @@ def main():
     compiled_patterns = compile_patterns(all_patterns)
 
     # Process log files
-    initialize_no_matches_file()
-    saved_files, skipped_files = process_all_files(INPUT_DIR, compiled_patterns)
-
-    print(f"Processing complete. Newly saved files: {saved_files}. Skipped {skipped_files} files, because they already existed.")
+    process_all_files(INPUT_DIR, compiled_patterns)
 
 # Run the main function
 if __name__ == '__main__':

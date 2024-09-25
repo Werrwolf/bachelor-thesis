@@ -56,7 +56,6 @@ def main(configuration):
             logging.warning(f"only {len(chosen_objects)} objects found")
             break
 
-
         # Building filenames for the check ([0] = extract without extension)
         with open(BLACKLIST, 'r') as f:
             blacklist = f.read().splitlines()
@@ -65,14 +64,14 @@ def main(configuration):
         preprocessed_filepath = os.path.join("preprocessed_logs", f"{base_filename}_cropped.json")
         datasets_filepath = os.path.join("datasets", f"{base_filename}_cropped.csv")
         # Does log exist in datasets or preprocessed already? (Yes: skip, No: add to chosen_objects)
-        if not (os.path.exists(preprocessed_filepath) and os.path.exists(datasets_filepath) and current_object in blacklist):
+        if not os.path.exists(preprocessed_filepath) and not os.path.exists(datasets_filepath) and not current_object in blacklist:
             chosen_objects.add(current_object)
 
     # Download chosen_objects
     for obj in chosen_objects:
         raw_logs_dir = os.path.join("logs", os.path.basename(obj))
         logging.info(f"Downloading {obj} to {raw_logs_dir}")
-        s3.download_file(configuration.bucket_name, obj, preprocessed_filepath)
+        s3.download_file(configuration.bucket_name, obj, raw_logs_dir)
     print(f"Finished downloading {len(chosen_objects)} new logs")
 
 
