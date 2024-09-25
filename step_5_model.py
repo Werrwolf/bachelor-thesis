@@ -39,7 +39,7 @@ here specifically, the learning rate starts at config["learning_rate"] and decre
 
 
 LIST_OF_DATASETS = listdir("/home/q524745/bachelor_thesis/ten_ds")
-DIR = "ten_ds"
+DIR = "ten_ds"  ## TODO change
 TRAIN_PERCENTAGE = 0.8
 TEST_PERCENTAGE = 0.2
 
@@ -169,7 +169,7 @@ class RoBERTaClassifier(nn.Module):                                             
 
     def forward(self, input_ids, attention_mask, labels=None):
         outputs = self.roberta(input_ids=input_ids, attention_mask=attention_mask)
-        pooled_output = outputs.last_hidden_state.mean(dim=1)
+        pooled_output = outputs.last_hidden_state.mean(dim=1)           # macht mean hier sinn? wenns ja ne categorical nummer is? maybe median notwendig?! Muss da noch drüber nachdenken
         logits = self.classifier(self.dropout(pooled_output))
         loss = 0
         

@@ -19,6 +19,7 @@ import logging
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+BLACKLIST = 'blacklist.txt'
 
 def main(configuration):
     # Initialise the client
@@ -57,18 +58,20 @@ def main(configuration):
 
 
         # Building filenames for the check ([0] = extract without extension)
+        with open(BLACKLIST, 'r') as f:
+            blacklist = f.read().splitlines()
+
         base_filename = os.path.splitext(os.path.basename(current_object))[0]
         preprocessed_filepath = os.path.join("preprocessed_logs", f"{base_filename}_cropped.json")
         datasets_filepath = os.path.join("datasets", f"{base_filename}_cropped.csv")
         # Does log exist in datasets or preprocessed already? (Yes: skip, No: add to chosen_objects)
-        if not os.path.exists(preprocessed_filepath) or os.path.exists(datasets_filepath):
+        if not (os.path.exists(preprocessed_filepath) and os.path.exists(datasets_filepath) and current_object in blacklist):
             chosen_objects.add(current_object)
-
 
     # Download chosen_objects
     for obj in chosen_objects:
-        preprocessed_filepath = os.path.join("logs", os.path.basename(obj))
-        logging.info(f"Downloading {obj} to {preprocessed_filepath}")
+        raw_logs_dir = os.path.join("logs", os.path.basename(obj))
+        logging.info(f"Downloading {obj} to {raw_logs_dir}")
         s3.download_file(configuration.bucket_name, obj, preprocessed_filepath)
     print(f"Finished downloading {len(chosen_objects)} new logs")
 

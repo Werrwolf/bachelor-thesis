@@ -68,10 +68,10 @@ def process_single_file(directory_path, filename, compiled_patterns):
                 if matches_list:
                     task_matches.setdefault(task_key, defaultdict(set))
                     for match in matches_list:
-                        error_cluster, error_type, pattern = match
-                        task_matches[task_key][(error_cluster, error_type, pattern)].add(stdout_text)
-                    for (error_cluster, error_type, pattern), log_entries in task_matches[task_key].items():
-                        dataset.append((task_id, "\n".join(log_entries), error_cluster, error_type))
+                        main_category, sub_category, pattern = match
+                        task_matches[task_key][(main_category, sub_category, pattern)].add(stdout_text)
+                    for (main_category, sub_category, pattern), log_entries in task_matches[task_key].items():
+                        dataset.append((task_id, "\n".join(log_entries), main_category, sub_category))
     except json.JSONDecodeError as e:
         print(f"Error decoding JSON file {filename}: {e}")
         with open('skipped_logs.txt',"a") as skipped_list:
@@ -102,7 +102,7 @@ def process_all_files(directory_path, compiled_patterns):
     Skips processing if the corresponding file already exists.
     """
     files = [f for f in os.listdir(directory_path) if f.endswith('.json')]
-    no_match_dir = "no_matches"
+    # no_match_dir = "no_matches"
     saved_files = 0
     skipped_files = 0
 

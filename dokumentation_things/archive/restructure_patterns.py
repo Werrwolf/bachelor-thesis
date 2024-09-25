@@ -1,6 +1,9 @@
 import json
 import extract_build_failures.error_patterns as error_patterns
 
+
+# I think I do not need this anymore
+
 INFRA_PATTERNS = error_patterns.INFRA_PATTERNS
 BUILD_PATTERNS = error_patterns.BUILD_PATTERNS
 
