@@ -52,6 +52,7 @@ test_dataset_names = LIST_OF_DATASETS[SPLIT_CUTOFF:]
 
 tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
 
+############################################################# Label Mapping #####################################################
 
 def build_label_mapping(dataset_names, dir_path, save_path="label_mapping.json"):
     unique_labels = set()
@@ -75,6 +76,7 @@ def load_label_mapping(file_path="label_mapping.json"):
         label_mapping=json.load(file)
     return label_mapping
 
+############################################################# Dataloader #####################################################
 
 def streaming_load_data_files (dataset_names, dir_path):
     for file_name in dataset_names:
@@ -87,6 +89,7 @@ def streaming_load_data_files (dataset_names, dir_path):
 # def tokenize_something(example):
 #     return tokenizer(example["log_line"], truncation=True, padding=True, clean_up_tokenization_spaces=False)
 
+############################################################# Custom Dataset #####################################################
 
 class CustomDataset(Dataset):
     def __init__(self, dataset_stream, tokenizer, label_mapping, max_token_length=512):
@@ -124,7 +127,7 @@ class CustomDataset(Dataset):
                 "labels": label.unsqueeze(0)
             }
 
-
+############################################################# Custom Dataloader #####################################################
 class CustomDataModule:
     def __init__(self, train_dataset_names, test_dataset_names, dir_path, batch_size=16, max_token_length=512, mapping_file="label_mapping.json"):                #TODO Rename dir_path to clearer name, Why this batch size & toen length?
         self.train_dataset_names = train_dataset_names
@@ -134,10 +137,14 @@ class CustomDataModule:
         self.max_token_length = max_token_length
         self.tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
 
-        if os.path.exists(mapping_file):
-            self.label_mapping = load_label_mapping(mapping_file)
-        else: 
-            self.label_mapping = build_label_mapping(self.train_dataset_names, self.dir_path, save_path="mapping_file")
+        try:
+            with open('label_mapping.json', "r") as f:
+                if os.path.exists(mapping_file):
+                    self.label_mapping = load_label_mapping(mapping_file)
+                else:
+                    self.label_mapping = build_label_mapping(self.train_dataset_names, self.dir_path, save_path="mapping_file")
+        except Exception:
+            print("'label-mapping' is empty. Fix it")
 
     def setup(self):
         # Load streaming data
@@ -157,7 +164,7 @@ class CustomDataModule:
     def test_dataloader(self):
         return iter(self.test_dataset)
 
-
+############################################################# Classifier #####################################################
 class RoBERTaClassifier(nn.Module):                                                  # TODO All of this class
     def __init__(self, n_labels):
         super(RoBERTaClassifier, self).__init__()
@@ -178,7 +185,7 @@ class RoBERTaClassifier(nn.Module):                                             
 
         return loss, logits
     
-
+############################################################# Training loop #####################################################
 def train_model(model, data_module, config):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
@@ -228,6 +235,7 @@ def train_model(model, data_module, config):
         scheduler.step()
     return model
 
+
 def predict_on_testdata(model, data_module):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
@@ -245,26 +253,26 @@ def predict_on_testdata(model, data_module):
     return np.concatenate(predictions)
 
 
-# Training config
-config = {
-    "n_labels": 41 ,                        # TODO find out (unique() on main categories oder so)
-    "learning_rate": 1e-5, 
-    "weight_decay": 0.01,
-    "n_epochs": 1,
-    "batch_size": 16
-}
+# # Training config
+# config = {
+#     "n_labels": 41 ,
+#     "learning_rate": 1e-5, 
+#     "weight_decay": 0.01,
+#     "n_epochs": 1,
+#     "batch_size": 16
+# }
 
-# # Init data module and model
-data_module = CustomDataModule(train_dataset_names,test_dataset_names, DIR, batch_size=config["batch_size"])
-data_module.setup()
-n_labels=len(data_module.label_mapping)
-model = RoBERTaClassifier(n_labels=config["n_labels"])
+# # # Init data module and model
+# data_module = CustomDataModule(train_dataset_names,test_dataset_names, DIR, batch_size=config["batch_size"])
+# data_module.setup()
+# n_labels=len(data_module.label_mapping)
+# model = RoBERTaClassifier(n_labels=config["n_labels"])
 
-# # Train model
-# trained_model = train_model(model, data_module, config)
+# # # Train model
+# # trained_model = train_model(model, data_module, config)
 
-# # Predict on test set
-# predictions = predict_on_testdata(trained_model, data_module)
-# # print(f"Predictions on test set: {predictions}")
+# # # Predict on test set
+# # predictions = predict_on_testdata(trained_model, data_module)
+# # # print(f"Predictions on test set: {predictions}")
 
-# print("Training and Predictions completed")
+# # print("Training and Predictions completed")
