@@ -38,8 +38,8 @@ here specifically, the learning rate starts at config["learning_rate"] and decre
 """
 
 
-LIST_OF_DATASETS = listdir("/home/q524745/bachelor_thesis/ten_ds")
-DIR = "ten_ds"  ## TODO change
+LIST_OF_DATASETS = listdir("/home/q524745/bachelor_thesis/datasets")
+DIR = "datasets"  ## TODO change
 TRAIN_PERCENTAGE = 0.8
 TEST_PERCENTAGE = 0.2
 
@@ -136,7 +136,7 @@ class CustomDataModule:
         self.batch_size = batch_size
         self.max_token_length = max_token_length
         self.tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
-
+        # self.label_mapping = 
         try:
             with open('label_mapping.json', "r") as f:
                 if os.path.exists(mapping_file):
@@ -152,8 +152,8 @@ class CustomDataModule:
         self.test_stream = streaming_load_data_files(self.test_dataset_names, self.dir_path)
 
         # Create datasets from streams
-        self.train_dataset = CustomDataset(self.train_stream, self.tokenizer, self.label_mapping, max_token_length=self.max_token_length)
-        self.test_dataset = CustomDataset(self.test_stream, self.tokenizer, self.label_mapping, max_token_length=self.max_token_length)
+        self.train_dataset = CustomDataset(self.train_stream, self.tokenizer, max_token_length=self.max_token_length)
+        self.test_dataset = CustomDataset(self.test_stream, self.tokenizer, max_token_length=self.max_token_length)
 
     def train_dataloader(self):
         return iter(self.train_dataset)
@@ -165,6 +165,7 @@ class CustomDataModule:
         return iter(self.test_dataset)
 
 ############################################################# Classifier #####################################################
+
 class RoBERTaClassifier(nn.Module):                                                  # TODO All of this class
     def __init__(self, n_labels):
         super(RoBERTaClassifier, self).__init__()
@@ -202,12 +203,20 @@ def train_model(model, data_module, config):
         # iterate over datastream
         for example in train_stream:
             optimizer.zero_grad()
+            """
+            In PyTorch, for every mini-batch during the training phase, we typically want to explicitly set the gradients to zero before starting
+            to do backpropagation (i.e., updating the Weights and biases) because PyTorch accumulates the gradients on subsequent backward passes.
+            This accumulating behavior is convenient while training RNNs or when we want to compute the gradient of the loss summed over multiple mini-batches.
+            So, the default action has been set to accumulate (i.e. sum) the gradients on every loss.backward() call.
+
+            Because of this, when you start your training loop, ideally you should zero out the gradients so that you do the parameter update correctly. Otherwise,
+            the gradient would be a combination of the old gradient, which you have already used to update your model parameters and the newly-computed gradient.
+            It would therefore point in some other direction than the intended direction towards the minimum (or maximum, in case of maximization objectives).
+            @ https://stackoverflow.com/questions/48001598/why-do-we-need-to-call-zero-grad-in-pytorch
+
+            """
             batch = {k: v.to(device) for k, v, in example.items()}
             
-            # # Debugging
-            # print(f"Input IDs shape: {batch['input_ids'].shape}")
-            # print(f"Labels shape: {batch['labels'].shape}")
-
             #Forward pass
             loss, logits = model(batch["input_ids"], batch["attention_mask"], batch["labels"])
             loss.backward()
@@ -236,36 +245,21 @@ def train_model(model, data_module, config):
     return model
 
 
-def predict_on_testdata(model, data_module):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model.to(device)
-    model.eval()
+# Training config
+config = {
+    "learning_rate": 1e-5, 
+    "weight_decay": 0.01,
+    "n_epochs": 1,
+    "batch_size": 16
+}
 
-    predictions = []
-    test_stream = data_module.test_dataloader()
+# # Init data module and model
+data_module = CustomDataModule(train_dataset_names,test_dataset_names, DIR, batch_size=config["batch_size"])
+data_module.setup()
+label_mapping =  build_label_mapping(train_dataset_names, DIR, save_path="label_mapping.json")
+n_labels=len(data_module.label_mapping)
 
-    with torch.no_grad():
-        for example in test_stream:
-            batch = {k: v.to(device) for k, v, in example.items()}            
-            loss, logits = model(batch["input_ids"], batch["attention_mask"])       
-            predictions.append(torch.argmax(logits, dim=1).cpu().numpy())               # TODO HUH?
-
-    return np.concatenate(predictions)
-
-
-# # Training config
-# config = {
-#     "n_labels": 41 ,
-#     "learning_rate": 1e-5, 
-#     "weight_decay": 0.01,
-#     "n_epochs": 1,
-#     "batch_size": 16
-# }
-
-# # # Init data module and model
-# data_module = CustomDataModule(train_dataset_names,test_dataset_names, DIR, batch_size=config["batch_size"])
-# data_module.setup()
-# n_labels=len(data_module.label_mapping)
+print(n_labels)
 # model = RoBERTaClassifier(n_labels=config["n_labels"])
 
 # # # Train model

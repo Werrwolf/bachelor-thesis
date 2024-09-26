@@ -25,7 +25,6 @@ warnings.filterwarnings(
     'ignore',
     message="The dataloader, val_dataloader 0, does not have many workers which may be a bottleneck."
 )
-
 LIST_OF_DATASETS = listdir("/home/q524745/bachelor_thesis/ten_ds")
 DIR = "ten_ds"  ## TODO change
 TRAIN_PERCENTAGE = 0.8
@@ -47,21 +46,26 @@ config = {
     "batch_size": 16            # depends on memory
 }
 
+def predict_on_testdata(model, data_module):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model.to(device)
+    model.eval()
 
-if __name__ == "__main__":
-    # # Init data module and model
-    data_module = train_util.CustomDataModule(train_dataset_names,test_dataset_names, DIR, batch_size=config["batch_size"])
-    data_module.setup()
-    n_labels=len(data_module.label_mapping)
-    model = train_util.RoBERTaClassifier(n_labels=n_labels)
+    predictions = []
+    test_stream = data_module.test_dataloader()
 
-    # Train model
-    trained_model = train_util.train_model(model, data_module, config)
-    # TODO save model 
+    with torch.no_grad():
+        for example in test_stream:
+            batch = {k: v.to(device) for k, v, in example.items()}            
+            loss, logits = model(batch["input_ids"], batch["attention_mask"])       
+            predictions.append(torch.argmax(logits, dim=1).cpu().numpy())               # TODO HUH?
 
-    
-    # # Predict on test set
-    # predictions = predict_on_testdata(trained_model, data_module)
-    # # print(f"Predictions on test set: {predictions}")
+    return np.concatenate(predictions)
 
-    # print("Training and Predictions completed")
+# Run
+data_module = train_util.CustomDataModule(train_dataset_names,test_dataset_names, DIR, batch_size=config["batch_size"])
+data_module.setup()
+model= 0    # TODO load saved model  
+predictions = predict_on_testdata(model, data_module)
+
+# TODO Evaluation? Welche Metrik?
