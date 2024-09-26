@@ -33,8 +33,8 @@ def build_label_mapping(dataset_names, dir_path, save_path="label_mapping.json")
     print(f"Unique labels: {len(unique_labels)}")
     label_mapping = {label:idx for idx, label in enumerate(sorted(unique_labels))}
 
-    # with open(save_path, "w") as file:
-        # json.dump(label_mapping, file)
+    with open(save_path, "w") as file:
+        json.dump(label_mapping, file)
 
     return label_mapping
 
