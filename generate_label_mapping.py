@@ -1,6 +1,7 @@
 import random
 import os
 import json
+import tqdm
 
 from os import listdir
 from datasets import load_dataset
@@ -23,8 +24,7 @@ tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
 
 def build_label_mapping(dataset_names, dir_path, save_path="label_mapping.json"):
     unique_labels = set()
-    for file_name in dataset_names:
-
+    for file_name in tqdm.tqdm(dataset_names):
         filepath = os.path.join(dir_path, file_name)
         dataset = load_dataset("csv", data_files=filepath, split="train", streaming=True)
         for example in dataset:

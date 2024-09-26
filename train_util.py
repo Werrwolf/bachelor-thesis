@@ -16,6 +16,7 @@ from transformers import AutoModel
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from transformers import logging as transformers_logging
+import generate_label_mapping
 
 # Suppress warnings
 warnings.filterwarnings('ignore', category=FutureWarning)
@@ -39,11 +40,11 @@ here specifically, the learning rate starts at config["learning_rate"] and decre
 
 
 LIST_OF_DATASETS = listdir("/home/q524745/bachelor_thesis/datasets")
-DIR = "datasets"  ## TODO change
+DIR = "datasets" 
 TRAIN_PERCENTAGE = 0.8
 TEST_PERCENTAGE = 0.2
 
-random.shuffle(LIST_OF_DATASETS)
+# random.shuffle(LIST_OF_DATASETS)
 
 SPLIT_CUTOFF = int(len(LIST_OF_DATASETS) * TRAIN_PERCENTAGE)
 
@@ -53,23 +54,6 @@ test_dataset_names = LIST_OF_DATASETS[SPLIT_CUTOFF:]
 tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
 
 ############################################################# Label Mapping #####################################################
-
-def build_label_mapping(dataset_names, dir_path, save_path="label_mapping.json"):
-    unique_labels = set()
-    for file_name in dataset_names:
-        filepath = os.path.join(dir_path, file_name)
-        dataset = load_dataset("csv", data_files=filepath, split="train", streaming=True)
-        for example in dataset:
-            if "main_category" in example: 
-                unique_labels.add(example["main_category"])
-    print(f"Unique labels: {len(unique_labels)}")
-    label_mapping = {label:idx for idx, label in enumerate(sorted(unique_labels))}
-
-    with open(save_path, "w") as file:
-        json.dump(label_mapping, file)
-
-    return label_mapping
-
 
 def load_label_mapping(file_path="label_mapping.json"):
     with open(file_path, "r") as file:
@@ -86,11 +70,7 @@ def streaming_load_data_files (dataset_names, dir_path):
             yield example
 
 
-# def tokenize_something(example):
-#     return tokenizer(example["log_line"], truncation=True, padding=True, clean_up_tokenization_spaces=False)
-
 ############################################################# Custom Dataset #####################################################
-
 class CustomDataset(Dataset):
     def __init__(self, dataset_stream, tokenizer, label_mapping, max_token_length=512):
         self.data_stream = dataset_stream
@@ -129,22 +109,21 @@ class CustomDataset(Dataset):
 
 ############################################################# Custom Dataloader #####################################################
 class CustomDataModule:
-    def __init__(self, train_dataset_names, test_dataset_names, dir_path, batch_size=16, max_token_length=512, mapping_file="label_mapping.json"):                #TODO Rename dir_path to clearer name, Why this batch size & toen length?
+    def __init__(self, train_dataset_names, test_dataset_names, dir_path, batch_size=16, max_token_length=512, mapping_file="label_mapping.json"):
         self.train_dataset_names = train_dataset_names
         self.test_dataset_names = test_dataset_names
         self.dir_path = dir_path
         self.batch_size = batch_size
         self.max_token_length = max_token_length
         self.tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
-        # self.label_mapping = 
-        try:
-            with open('label_mapping.json', "r") as f:
-                if os.path.exists(mapping_file):
-                    self.label_mapping = load_label_mapping(mapping_file)
-                else:
-                    self.label_mapping = build_label_mapping(self.train_dataset_names, self.dir_path, save_path="mapping_file")
-        except Exception:
-            print("'label-mapping' is empty. Fix it")
+        # try:
+        #     with open('label_mapping.json', "r"):
+        #         if os.path.exists(mapping_file):
+        #             self.label_mapping = load_label_mapping(mapping_file)
+        #         # else:
+        #             # self.label_mapping = generate_label_mapping.build_label_mapping(self.train_dataset_names, self.dir_path, save_path="mapping_file")
+        # except Exception:
+        #     print("'label-mapping' is empty. Fix it")
 
     def setup(self):
         # Load streaming data
@@ -152,8 +131,8 @@ class CustomDataModule:
         self.test_stream = streaming_load_data_files(self.test_dataset_names, self.dir_path)
 
         # Create datasets from streams
-        self.train_dataset = CustomDataset(self.train_stream, self.tokenizer, max_token_length=self.max_token_length)
-        self.test_dataset = CustomDataset(self.test_stream, self.tokenizer, max_token_length=self.max_token_length)
+        self.train_dataset = CustomDataset(self.train_stream, self.tokenizer,self.label_mapping, max_token_length=self.max_token_length)
+        self.test_dataset = CustomDataset(self.test_stream, self.tokenizer, self.label_mapping, max_token_length=self.max_token_length)
 
     def train_dataloader(self):
         return iter(self.train_dataset)
@@ -253,20 +232,5 @@ config = {
     "batch_size": 16
 }
 
-# # Init data module and model
-data_module = CustomDataModule(train_dataset_names,test_dataset_names, DIR, batch_size=config["batch_size"])
-data_module.setup()
-label_mapping =  build_label_mapping(train_dataset_names, DIR, save_path="label_mapping.json")
-n_labels=len(data_module.label_mapping)
-
-print(n_labels)
-# model = RoBERTaClassifier(n_labels=config["n_labels"])
-
-# # # Train model
-# # trained_model = train_model(model, data_module, config)
-
-# # # Predict on test set
-# # predictions = predict_on_testdata(trained_model, data_module)
-# # # print(f"Predictions on test set: {predictions}")
-
-# # print("Training and Predictions completed")
+if __name__ == "__main__":
+    print("'train.util' cannot be run directly. Try running 'train.py' instead")
