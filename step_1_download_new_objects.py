@@ -27,8 +27,8 @@ def main(configuration):
     # Initialise the client
     s3 = boto3.client(
         "s3",
-        ***REMOVED***=configuration.***REMOVED***,
-        ***REMOVED***=configuration.***REMOVED***,
+        aws_access_key_id=configuration.aws_access_key_id,
+        aws_secret_access_key=configuration.aws_secret_access_key,
     )
 
     # Ensure the directory "logs" exists
@@ -79,9 +79,9 @@ def main(configuration):
 
 def parse_input_arguments():
     parser = argparse.ArgumentParser(description="Inputs for script")
-    parser.add_argument("--***REMOVED***", help="Service account access key ID")
+    parser.add_argument("--aws_access_key_id", help="Service account access key ID")
     parser.add_argument(
-        "--***REMOVED***", help="Service account access key secret"
+        "--aws_secret_access_key", help="Service account access key secret"
     )
     parser.add_argument(
         "--bucket_name", help="The name of the bucket to download files from"
