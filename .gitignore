@@ -18,3 +18,4 @@ saved_weights.pt
 review_data.zip
 stats.prof
 .vscode
+error_log_files_raw/
