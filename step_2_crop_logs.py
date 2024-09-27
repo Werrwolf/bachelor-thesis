@@ -1,7 +1,7 @@
 # Preprocess logs
 import json
 import os
-import tqdm
+ 
 
 # Usage:
 SOURCE_DIR = 'logs'
