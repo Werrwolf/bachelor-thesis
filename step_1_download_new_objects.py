@@ -8,6 +8,8 @@ To install the library in a venv in a Unix environment, the following commands c
     $ pip3 install boto3
 The python script can then be run like the following:
 
+NO MORE SECRETS!
+
 To count files in a dir in Unix: 
     ls -1 | wc -l
 """
