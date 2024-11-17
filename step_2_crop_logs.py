@@ -4,7 +4,7 @@ import os
  
 
 # Usage:
-SOURCE_DIR = 'logs'
+SOURCE_DIR = 'error_log_files_raw'
 TARGET_DIR = 'preprocessed_logs'
 DATASET_DIR='datasets'
 BLACKLIST='blacklist.txt'
@@ -60,7 +60,7 @@ def extract_error_info_from_file(filenameWithExtension):
     Returns:
         list: A list of dictionaries containing error information.
     """
-    log_filepath = os.path.join("logs", filenameWithExtension)    
+    log_filepath = os.path.join("error_log_files_raw", filenameWithExtension)    
     error_info_list = []
     try:
         with open(log_filepath, 'r', encoding='utf-8') as file:
@@ -108,7 +108,7 @@ def save_error_info(target_dir):
             new_file_path = os.path.join(target_dir, new_filename)
             with open(new_file_path, 'w', encoding='utf-8') as new_file:
                 json.dump(error_info, new_file, indent=4)
-            old_path = os.path.join('logs', filename)
+            old_path = os.path.join('error_log_files_raw', filename)
             # print(old_path)
             os.remove(old_path)
     return all_error_info
