@@ -5,14 +5,13 @@ from collections import defaultdict
 import unicodedata
 import matplotlib.pyplot as plt
 import warnings
+import numpy as np
 from os import listdir
 from datasets import load_dataset
 
 # Suppress warnings
 warnings.filterwarnings('ignore', category=FutureWarning)
-
-LIST_OF_DATASETS = listdir("dev_datasets")
-DIR = "dev_datasets"
+DIR = "datasets"
 
 def normalize_text(text):
     """Normalize text by removing leading/trailing whitespaces, converting to lower case, and removing non-ASCII characters."""
@@ -21,7 +20,8 @@ def normalize_text(text):
     # Normalize unicode characters and strip leading/trailing whitespace
     return unicodedata.normalize("NFKC", text).strip().lower()
 
-def build_label_mapping(dataset_names, dir_path, save_path="label_mapping.json"):
+def build_label_mapping(dir_path, save_path="label_mapping.json"):
+    dataset_names = listdir(DIR)
     unique_labels = set()
     label_counts = defaultdict(int)  # To count occurrences of each main_category
     for file_name in tqdm.tqdm(dataset_names):
@@ -49,8 +49,8 @@ def build_label_mapping(dataset_names, dir_path, save_path="label_mapping.json")
     sorted_labels, sorted_counts = zip(*sorted_labels_counts)
     sorted_counts = list(sorted_counts)
     label_mapping = {label: idx for idx, label in enumerate(sorted(unique_labels))}
-    # with open(save_path, "w") as file:
-    #     json.dump(label_mapping, file)
+    with open(save_path, "w") as file:
+        json.dump(label_mapping, file)
 
     # Logarithmic Bar Chart
     plt.figure(figsize=(12, 6))
@@ -62,20 +62,19 @@ def build_label_mapping(dataset_names, dir_path, save_path="label_mapping.json")
     plt.tight_layout()
     plt.show()
 
+    # Cumulative Distribution Plot
+    cumulative_counts = np.cumsum(sorted_counts)
+    plt.figure(figsize=(12, 6))
+    plt.plot(sorted_labels, cumulative_counts, marker='o')
+    plt.xticks(rotation=90)
+    plt.xlabel('Main Categories (Sorted)')
+    plt.ylabel('Cumulative Occurrences')
+    plt.title('Cumulative Distribution of Main Categories')
+    plt.tight_layout()
+    plt.show()
+
     return label_mapping
 
-labels = build_label_mapping(LIST_OF_DATASETS, DIR, save_path="label_mapping.json")
-
-print("done")
-
-    # Cumulative Distribution Plot
-    # cumulative_counts = np.cumsum(sorted_counts)
-
-    # plt.figure(figsize=(12, 6))
-    # plt.plot(sorted_labels, cumulative_counts, marker='o')
-    # plt.xticks(rotation=90)
-    # plt.xlabel('Main Categories (Sorted)')
-    # plt.ylabel('Cumulative Occurrences')
-    # plt.title('Cumulative Distribution of Main Categories')
-    # plt.tight_layout()
-    # plt.show()
+if __name__ == "__main__":
+    labels = build_label_mapping(DIR, save_path="label_mapping.json")
+    print("done")

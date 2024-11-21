@@ -20,3 +20,4 @@ stats.prof
 .vscode
 error_log_files_raw/
 preprocess_logs.ipynb
+images/

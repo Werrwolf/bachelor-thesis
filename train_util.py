@@ -1,12 +1,11 @@
-import numpy as np
 import random
 import os
 import torch
-import warnings
-
-import torch.nn as nn
 import json
+
+import numpy as np
 import torch.optim as optim
+import torch.nn as nn
 
 from os import listdir
 from datasets import load_dataset
@@ -17,14 +16,6 @@ from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_sc
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from transformers import logging as transformers_logging
 import generate_label_mapping
-
-# Suppress warnings
-warnings.filterwarnings('ignore', category=FutureWarning)
-transformers_logging.set_verbosity_error()
-warnings.filterwarnings(
-    'ignore',
-    message="The dataloader, val_dataloader 0, does not have many workers which may be a bottleneck."
-)
 
 """
 Why use CosineAnnealingLR: 
@@ -38,18 +29,18 @@ here specifically, the learning rate starts at config["learning_rate"] and decre
     Without: Learning rate decays gradually over all epochs.
 """
 
+DIR = "dev_datasets" 
+list_of_datasets = listdir(DIR)
 
-LIST_OF_DATASETS = listdir("/home/q524745/bachelor_thesis/datasets")
-DIR = "datasets" 
 TRAIN_PERCENTAGE = 0.8
 TEST_PERCENTAGE = 0.2
 
 # random.shuffle(LIST_OF_DATASETS)
 
-SPLIT_CUTOFF = int(len(LIST_OF_DATASETS) * TRAIN_PERCENTAGE)
+SPLIT_CUTOFF = int(len(list_of_datasets) * TRAIN_PERCENTAGE)
 
-train_dataset_names  = LIST_OF_DATASETS[:SPLIT_CUTOFF]
-test_dataset_names = LIST_OF_DATASETS[SPLIT_CUTOFF:]
+train_dataset_names  = list_of_datasets[:SPLIT_CUTOFF]
+test_dataset_names = list_of_datasets[SPLIT_CUTOFF:]
 
 tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
 
