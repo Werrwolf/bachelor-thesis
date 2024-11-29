@@ -21,3 +21,4 @@ stats.prof
 error_log_files_raw/
 preprocess_logs.ipynb
 images/
+nones_in_csv.txt

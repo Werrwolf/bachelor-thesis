@@ -1,0 +1,58 @@
+Ergebnisse pro Datei:
+- 082b5cf2a117432e9b647169078778bee9cd4988ba1498934a25d5b05135d86f__job-output_cropped.csv: 6 None-Werte, 1 keine-None-Werte
+- 082c1786c2cf407ab9d6043c3425347249bf8715e29224e6abdc27a1abb1865f__job-output_cropped.csv: 14 None-Werte, 8 keine-None-Werte
+- 082c9ed8eea8f0f91ef0443e4e9466f911613adf6acc041ee0dbd02ab0956f8e__job-output_cropped.csv: 2 None-Werte, 2 keine-None-Werte
+- 082e6857a313d7f9ed3940db2fe477b946d8877136b99162d62da548adc52b7c__job-output_cropped.csv: 2 None-Werte, 2 keine-None-Werte
+- 083a433c925034ce3069ed6e1eb488a18d14f4470e6a071ba9ac26630573a40a__job-output_cropped.csv: 3 None-Werte, 6 keine-None-Werte
+- 083a5e7779223d361aba8d1e8e84b59193a1106b31a3b1511d70dc73c71344a8__job-output_cropped.csv: 2 None-Werte, 13 keine-None-Werte
+- 083cdfe86f6131ebc64ca7c7b8c42c394715a8b2dda69ba0adfaffaed507c661__job-output_cropped.csv: 2 None-Werte, 1 keine-None-Werte
+- 083ce4da3ff4e24cd71608bb29eae0f0d6b8b97ad0b0e4b1c5f300fb00982373__job-output_cropped.csv: 4 None-Werte, 12 keine-None-Werte
+- 083d7abb1777a95856ce7e3441b64e02158c4243fb3ad62956e109deb97f5c1e__job-output_cropped.csv: 2 None-Werte, 2 keine-None-Werte
+- 083e66734af0f2276f4775229df85db9eb4b266f75bc202e5d233ee1f48497ca__job-output_cropped.csv: 2 None-Werte, 6 keine-None-Werte
+- 083f6d69ed5d11cc7c7b44fd7d83b0d1e47caa17d8b72f8d457bc4c4c54c77a1__job-output_cropped.csv: 2 None-Werte, 2 keine-None-Werte
+- 083f9c0eebb9c7f7897f896668f041fc40eff9010273aa755e8033520f16db03__job-output_cropped.csv: 2 None-Werte, 2 keine-None-Werte
+- 084ad3b26a71d69ed87af8da6935f1ee503a9ec385ee7b91b145f488bcff4687__job-output_cropped.csv: 4 None-Werte, 5 keine-None-Werte
+- 084add769138e018f1eada86b15083cbd57594d392a4379dfd7e4ba28d585679__job-output_cropped.csv: 3 None-Werte, 6 keine-None-Werte
+- 084b1d025c3e29b297e657e134b1cbf51f650b3d22e4ca53a6b570da75599602__job-output_cropped.csv: 4 None-Werte, 0 keine-None-Werte
+- 084c0bfb2bca706bcefa7f494b154132fc10689ffc79291cd7698903c2a80d45__job-output_cropped.csv: 1 None-Werte, 1 keine-None-Werte
+- 084c1dd7dbb28ed3ebddb0cc56ecd8d91872145d8addc66d55ecb3188daffd8d__job-output_cropped.csv: 2 None-Werte, 2 keine-None-Werte
+- 084c8bbad5127725c8f96e3c7b9fb921844da8172042cdefacb2089fbe20416b__job-output_cropped.csv: 1 None-Werte, 1 keine-None-Werte
+- 084ce9ed43ce474a591b37dca312fbc82fd132ada2886b3de0f60f04195d3c2e__job-output_cropped.csv: 1 None-Werte, 1 keine-None-Werte
+- 084d44f9c39376642ed843443fc63f04a4298c8092d140c55f3fbd79ae5f1e49__job-output_cropped.csv: 2 None-Werte, 76 keine-None-Werte
+- 084eb5379da8f956c73ec4e2c65a9ccfbe5804ed68adf58238d067aa80f29312__job-output_cropped.csv: 6 None-Werte, 11 keine-None-Werte
+- 085aa94c74816b041fad3dd706dcc5f4d384a486a68b3170bf956f5499ed7092__job-output_cropped.csv: 1 None-Werte, 2 keine-None-Werte
+- 085afbf6916c5c36e7291a48c250e3ce9a056a2ef88e227e346d778c690e67d7__job-output_cropped.csv: 1 None-Werte, 3 keine-None-Werte
+- 085bf47f76f2eb79cc854336c31a8403c0643730c59531597ec3abef03f7b49c__job-output_cropped.csv: 1 None-Werte, 1 keine-None-Werte
+- 085c0f775c8173c0e74e07b3e2c387f4c89b1ee216f3364aac3aaf837c4ebb87__job-output_cropped.csv: 1 None-Werte, 0 keine-None-Werte
+- 085e5ddb87df767c2aa1b877223fe85cc10337c83815b369339b83104d9bc5e3__job-output_cropped.csv: 2 None-Werte, 2 keine-None-Werte
+- 085f71ee6e200acc7241bfc30bbe78a8bca2e85d5d6726c1683d324fc611072c__job-output_cropped.csv: 1 None-Werte, 0 keine-None-Werte
+- 086de1d57a5ea6a362c8735261105bd5ef9fd41b4482661a8fbc2ed3d6ce3e8a__job-output_cropped.csv: 3 None-Werte, 6 keine-None-Werte
+- 086debb570b21c25265e917dc0a7e38b698b5d615cc7248ae5c6c8b96cc62d9d__job-output_cropped.csv: 5 None-Werte, 6 keine-None-Werte
+- 087b76114a70e7c3c0ecf13dd54687c6f13fbbc1899e2ee4db3d19035c62f142__job-output_cropped.csv: 1 None-Werte, 1 keine-None-Werte
+- 087de2b0a3f97c80029a868b9397006d0666c8bee3d12e8d38e4b71a7272d7bd__job-output_cropped.csv: 5 None-Werte, 6 keine-None-Werte
+- 087f58b5596bafa48b06305d216a1f7a4cc31f25e68a13e06fd38ed8ed70c45c__job-output_cropped.csv: 1 None-Werte, 6 keine-None-Werte
+- 087ff9d6e7081bf52cf387ee370d1d32632f90d0594922ea5ea0578b1b16df9b__job-output_cropped.csv: 1 None-Werte, 9 keine-None-Werte
+- 087ffbfb659835efef1b978927fcad76a131c5daf02903cd6de5de175e49d9ab__job-output_cropped.csv: 10 None-Werte, 15 keine-None-Werte
+- 088a9bd0abf1dd44f79578aef28ceeeb32bbc1526acbb8afa8f5de19a7493d2a__job-output_cropped.csv: 1 None-Werte, 0 keine-None-Werte
+- 088ad17d7c3025cf4adcf5d2cd0d655ceb0ccbc0210ddbc87e7b259bb9f9790a__job-output_cropped.csv: 2 None-Werte, 1 keine-None-Werte
+- 088b1722237d4630d6c2615bb1ee6ece64918f44ab86ba718d16bd17084a49d3__job-output_cropped.csv: 2 None-Werte, 13 keine-None-Werte
+- 088b3ac0755a90d4b13814c83a1329e89daadd0a5cfaf1d17e81e85f0567d21c__job-output_cropped.csv: 1 None-Werte, 2 keine-None-Werte
+- 088c3193c5a7d43e5e7e34319cd5241585df2799702f365f00136c585d1c2062__job-output_cropped.csv: 2 None-Werte, 5 keine-None-Werte
+- 088f4de0819ce4db001a4ac06d1884ad751b8078c8874b26fde08f33bace3a3e__job-output_cropped.csv: 2 None-Werte, 2 keine-None-Werte
+- 089bfe12cb25a3abaa8ad2b48121e54b4637e3fd32a71a443defbd1fb568d5e4__job-output_cropped.csv: 2 None-Werte, 1 keine-None-Werte
+- 089eb1720baa8811551bfda11f15e93bc9092547312c2843046d744648f5f722__job-output_cropped.csv: 8 None-Werte, 8 keine-None-Werte
+- 089eef18d062276fac4bd8793c0c812f546d65baeb68c07a4f59b9458f588ee4__job-output_cropped.csv: 1 None-Werte, 2 keine-None-Werte
+- 090a4ca040246daefeaf43707b219212eabde99aef54bc63fc87b2d50f4302c6__job-output_cropped.csv: 1 None-Werte, 2 keine-None-Werte
+- 090c75a8faa6c531970fa05ef8ed10801fd0e3587263942f17cc69f084227a44__job-output_cropped.csv: 2 None-Werte, 2 keine-None-Werte
+- 090cf44f9660468f553f4cb1a6c0def3aab7f59ccf11bc099c1d773bf3c49fd8__job-output_cropped.csv: 1 None-Werte, 5 keine-None-Werte
+- 090d312fb0ce6879f382089f587892b7461b607a3f577cbd9b82810b61370fe7__job-output_cropped.csv: 2 None-Werte, 2 keine-None-Werte
+- 090d4fd933f5cb26460b27904d0941d06916c40b6f652e142ea50682793cfac2__job-output_cropped.csv: 1 None-Werte, 0 keine-None-Werte
+- 091d39c8d48f19c0eb67b28b42d0d4d1a6a38610eed29645a17c3f6003f0c7a5__job-output_cropped.csv: 8 None-Werte, 13 keine-None-Werte
+
+Gesamtanzahl der Reihen ohne None-Werte in der Spalte 'log_line': 409, 75.04587155963303 %
+Gesamtanzahl der Reihen mit None-Werten in der Spalte 'log_line': 136, 24.954128440366972 %
+Gesamtanzahl der geprüften Reihen: 545
+Dateien mit None-Werten: 49
+
+Häufigkeiten der Werte in der Spalte 'main_category' für Reihen mit None in 'log_line':
+- Unknown error: 136 Mal

@@ -4,7 +4,7 @@ from glob import glob
 from collections import Counter
 
 # Ordnerpfad mit den CSV-Dateien
-ordner_pfad = "dev_datasets"
+ordner_pfad = "datasets"
 
 # Liste aller CSV-Dateien im Ordner
 csv_dateien = glob(os.path.join(ordner_pfad, "*.csv"))

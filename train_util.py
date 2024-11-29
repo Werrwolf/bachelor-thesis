@@ -15,7 +15,7 @@ from transformers import AutoModel
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from transformers import logging as transformers_logging
-import generate_label_mapping
+import step_5_generate_label_mapping as generate_label_mapping
 
 """
 Why use CosineAnnealingLR: 
@@ -31,17 +31,6 @@ here specifically, the learning rate starts at config["learning_rate"] and decre
 
 DIR = "dev_datasets" 
 list_of_datasets = listdir(DIR)
-
-TRAIN_PERCENTAGE = 0.8
-TEST_PERCENTAGE = 0.2
-
-# random.shuffle(LIST_OF_DATASETS)
-
-SPLIT_CUTOFF = int(len(list_of_datasets) * TRAIN_PERCENTAGE)
-
-train_dataset_names  = list_of_datasets[:SPLIT_CUTOFF]
-test_dataset_names = list_of_datasets[SPLIT_CUTOFF:]
-
 tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
 
 ############################################################# Label Mapping #####################################################
@@ -54,15 +43,58 @@ def load_label_mapping(file_path="label_mapping.json"):
 ############################################################# Dataloader #####################################################
 
 def streaming_load_data_files (dataset_names, dir_path):
+    # for file_name in dataset_names:
+    #     filepath = os.path.join(dir_path, file_name)
+    #     dataset = load_dataset("csv", data_files=filepath, split="train", streaming=True)
+    #     for example in dataset:
+    #         yield example
     for file_name in dataset_names:
         filepath = os.path.join(dir_path, file_name)
+        print(f"Loading dataset from {filepath}")  # Debug statement
         dataset = load_dataset("csv", data_files=filepath, split="train", streaming=True)
         for example in dataset:
+            print(f"Loaded example: {example}")  # Debug statement
             yield example
 
 
 ############################################################# Custom Dataset #####################################################
 class CustomDataset(Dataset):
+    # def __init__(self, dataset_stream, tokenizer, label_mapping, max_token_length=512):
+    #     self.data_stream = dataset_stream
+    #     self.tokenizer = tokenizer
+    #     self.label_mapping = label_mapping
+    #     self.max_token_length = max_token_length
+
+    # def __iter__(self):
+    #     # Iterate over the streaming dataset and debug
+    #     for example in self.data_stream:
+    #         try: 
+    #             log_line = example["log_line"]
+    #             main_category = example["main_category"]
+    #         except KeyError as e:
+    #             print(f"Missing field{e} in example: {example}")
+    #             continue            
+    #         # # Proceed with tokenization if both fields are present
+    #         # print("file name:" )
+    #         # print("Input example:", example)  # Log the example
+
+    #         tokenized_input = self.tokenizer.encode_plus(
+    #             log_line,
+    #             add_special_tokens=True,
+    #             truncation=True,
+    #             padding="max_length",
+    #             max_length=self.max_token_length,
+    #             return_attention_mask=True,
+    #             return_tensors="pt"
+    #         )
+    #         # Check if 'main_category' exists, otherwise set a default
+    #         label = torch.tensor(self.label_mapping.get('main_category', 0), dtype=torch.long)  # Default to 0 if 'main_category' is missing
+
+    #         yield {
+    #             "input_ids": tokenized_input["input_ids"],
+    #             "attention_mask": tokenized_input["attention_mask"],
+    #             "labels": label.unsqueeze(0)
+    #         }
     def __init__(self, dataset_stream, tokenizer, label_mapping, max_token_length=512):
         self.data_stream = dataset_stream
         self.tokenizer = tokenizer
@@ -72,35 +104,24 @@ class CustomDataset(Dataset):
     def __iter__(self):
         # Iterate over the streaming dataset and debug
         for example in self.data_stream:
-            try: 
-                log_line = example["log_line"]
-                main_category = example["main_category"]
-            except KeyError as e:
-                print(f"Missing field{e} in example: {example}")
-                continue
-            
-            # Proceed with tokenization if both fields are present
-            tokenized_input = self.tokenizer.encode_plus(
-                log_line,
-                add_special_tokens=True,
-                truncation=True,
+            print(f"Example: {example}")  # Debug statement
+            tokenized_example = self.tokenizer(
+                example["text"],
                 padding="max_length",
+                truncation=True,
                 max_length=self.max_token_length,
-                return_attention_mask=True,
                 return_tensors="pt"
             )
-            # Check if 'main_category' exists, otherwise set a default
-            label = torch.tensor(self.label_mapping.get('main_category', 0), dtype=torch.long)  # Default to 0 if 'main_category' is missing
+            tokenized_example["labels"] = torch.tensor(self.label_mapping[example["label"]])
+            yield tokenized_example
 
-            yield {
-                "input_ids": tokenized_input["input_ids"],
-                "attention_mask": tokenized_input["attention_mask"],
-                "labels": label.unsqueeze(0)
-            }
+    def __len__(self):
+        return sum(1 for _ in self.data_stream)
 
 ############################################################# Custom Dataloader #####################################################
 class CustomDataModule:
-    def __init__(self, train_dataset_names, test_dataset_names, dir_path, batch_size=16, max_token_length=512, mapping_file="label_mapping.json"):
+    def __init__(self, train_dataset_names, test_dataset_names, dir_path, batch_size=16, max_token_length=512, label_mapping="label_mapping.json"):
+        self.label_mapping = label_mapping
         self.train_dataset_names = train_dataset_names
         self.test_dataset_names = test_dataset_names
         self.dir_path = dir_path
@@ -125,11 +146,15 @@ class CustomDataModule:
         self.train_dataset = CustomDataset(self.train_stream, self.tokenizer,self.label_mapping, max_token_length=self.max_token_length)
         self.test_dataset = CustomDataset(self.test_stream, self.tokenizer, self.label_mapping, max_token_length=self.max_token_length)
 
+        # Debug: Print dataset sizes
+        print(f"Train dataset size: {len(list(self.train_dataset))}")
+        print(f"Test dataset size: {len(list(self.test_dataset))}")
+
     def train_dataloader(self):
         return iter(self.train_dataset)
     
-    # def val_dataloader(self):
-    #     return self.test_dataset
+    def val_dataloader(self):
+        return self.test_dataset
 
     def test_dataloader(self):
         return iter(self.test_dataset)
@@ -156,13 +181,81 @@ class RoBERTaClassifier(nn.Module):                                             
 
         return loss, logits
     
+    def save_pretrained(self, save_directory):
+        if not os.path.exists(save_directory):
+            os.makedirs(save_directory)
+        model_save_path = os.path.join(save_directory, "pytorch_model.bin")
+        torch.save(self.state_dict(), model_save_path)
+        self.roberta.config.save_pretrained(save_directory)
+    
 ############################################################# Training loop #####################################################
 def train_model(model, data_module, config):
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # model.to(device)
+
+    # optimizer = optim.AdamW(model.parameters(), lr=config["learning_rate"],weight_decay=config["weight_decay"])
+    # scheduler = CosineAnnealingLR(optimizer, T_max=config["n_epochs"], eta_min=1e-6)                            # TODO Questions
+
+    # for epoch in range(config["n_epochs"]):
+    #     model.train()
+    #     train_loss = 0
+    #     train_batch_counter = 0
+    #     train_stream = data_module.train_dataloader()
+
+    #     # iterate over datastream
+    #     for example in train_stream:
+    #         optimizer.zero_grad()
+    #         """
+    #         In PyTorch, for every mini-batch during the training phase, we typically want to explicitly set the gradients to zero before starting
+    #         to do backpropagation (i.e., updating the Weights and biases) because PyTorch accumulates the gradients on subsequent backward passes.
+    #         This accumulating behavior is convenient while training RNNs or when we want to compute the gradient of the loss summed over multiple mini-batches.
+    #         So, the default action has been set to accumulate (i.e. sum) the gradients on every loss.backward() call.
+
+    #         Because of this, when you start your training loop, ideally you should zero out the gradients so that you do the parameter update correctly. Otherwise,
+    #         the gradient would be a combination of the old gradient, which you have already used to update your model parameters and the newly-computed gradient.
+    #         It would therefore point in some other direction than the intended direction towards the minimum (or maximum, in case of maximization objectives).
+    #         @ https://stackoverflow.com/questions/48001598/why-do-we-need-to-call-zero-grad-in-pytorch
+
+    #         """
+    #         batch = {k: v.to(device) for k, v, in example.items()}
+            
+    #         #Forward pass
+    #         loss, logits = model(batch["input_ids"], batch["attention_mask"], batch["labels"])
+    #         loss.backward()
+    #         optimizer.step()
+    #         train_loss += loss.item()
+    #         train_batch_counter +=1
+    #         # Debug: Print batch information
+    #         print(f"Processed batch {train_batch_counter}")
+
+    #     # Check if any batches were processed
+    #     if train_batch_counter == 0:
+    #         print("No batches were processed during training.")
+    #         return model
+
+    #     # Validation loop
+    #     model.eval()
+    #     val_loss = 0
+    #     val_batch_counter = 0
+    #     val_stream = data_module.val_dataloader()
+    #     with torch.no_grad():
+    #         for example in val_stream:
+    #             batch = {k: v.to(device) for k, v, in example.items()}
+    #             loss, logits = model(batch["input_ids"], batch["attention_mask"], batch["labels"])
+    #             val_loss += loss.item()
+    #             val_batch_counter += 1
+
+    #     train_loss = train_loss/train_batch_counter
+    #     val_loss = val_loss/val_batch_counter
+
+    #     print(f"Epoch {epoch+1}, Train Loss: {train_loss:.4f}, Validation Loss: {val_loss:.4f}")
+    #     scheduler.step()
+    # return model
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
-    optimizer = optim.AdamW(model.parameters(), lr=config["learning_rate"],weight_decay=config["weight_decay"])
-    scheduler = CosineAnnealingLR(optimizer, T_max=config["n_epochs"], eta_min=1e-6)                            # TODO Questions
+    optimizer = optim.AdamW(model.parameters(), lr=config["learning_rate"], weight_decay=config["weight_decay"])
+    scheduler = CosineAnnealingLR(optimizer, T_max=config["n_epochs"], eta_min=1e-6)
 
     for epoch in range(config["n_epochs"]):
         model.train()
@@ -173,27 +266,22 @@ def train_model(model, data_module, config):
         # iterate over datastream
         for example in train_stream:
             optimizer.zero_grad()
-            """
-            In PyTorch, for every mini-batch during the training phase, we typically want to explicitly set the gradients to zero before starting
-            to do backpropagation (i.e., updating the Weights and biases) because PyTorch accumulates the gradients on subsequent backward passes.
-            This accumulating behavior is convenient while training RNNs or when we want to compute the gradient of the loss summed over multiple mini-batches.
-            So, the default action has been set to accumulate (i.e. sum) the gradients on every loss.backward() call.
-
-            Because of this, when you start your training loop, ideally you should zero out the gradients so that you do the parameter update correctly. Otherwise,
-            the gradient would be a combination of the old gradient, which you have already used to update your model parameters and the newly-computed gradient.
-            It would therefore point in some other direction than the intended direction towards the minimum (or maximum, in case of maximization objectives).
-            @ https://stackoverflow.com/questions/48001598/why-do-we-need-to-call-zero-grad-in-pytorch
-
-            """
-            batch = {k: v.to(device) for k, v, in example.items()}
+            batch = {k: v.to(device) for k, v in example.items()}
             
-            #Forward pass
+            # Forward pass
             loss, logits = model(batch["input_ids"], batch["attention_mask"], batch["labels"])
             loss.backward()
             optimizer.step()
             train_loss += loss.item()
-            train_batch_counter +=1
+            train_batch_counter += 1
 
+            # Debug: Print batch information
+            print(f"Processed batch {train_batch_counter}")
+
+        # Check if any batches were processed
+        if train_batch_counter == 0:
+            print("No batches were processed during training.")
+            return model
 
         # Validation loop
         model.eval()
@@ -202,18 +290,17 @@ def train_model(model, data_module, config):
         val_stream = data_module.val_dataloader()
         with torch.no_grad():
             for example in val_stream:
-                batch = {k: v.to(device) for k, v, in example.items()}
+                batch = {k: v.to(device) for k, v in example.items()}
                 loss, logits = model(batch["input_ids"], batch["attention_mask"], batch["labels"])
                 val_loss += loss.item()
                 val_batch_counter += 1
 
-        train_loss = train_loss/train_batch_counter
-        val_loss = val_loss/val_batch_counter
+        train_loss = train_loss / train_batch_counter
+        val_loss = val_loss / val_batch_counter
 
         print(f"Epoch {epoch+1}, Train Loss: {train_loss:.4f}, Validation Loss: {val_loss:.4f}")
         scheduler.step()
     return model
-
 
 # Training config
 config = {
