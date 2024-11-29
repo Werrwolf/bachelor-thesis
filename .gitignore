@@ -23,3 +23,4 @@ preprocess_logs.ipynb
 images/
 nones_in_csv.txt
 model/
+model/pytorch_model.bin
