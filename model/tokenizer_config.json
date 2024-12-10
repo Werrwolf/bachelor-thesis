@@ -47,6 +47,7 @@
   "cls_token": "<s>",
   "eos_token": "</s>",
   "errors": "replace",
+  "extra_special_tokens": {},
   "mask_token": "<mask>",
   "model_max_length": 512,
   "pad_token": "<pad>",
