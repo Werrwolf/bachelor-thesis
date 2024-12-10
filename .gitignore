@@ -1,8 +1,11 @@
 preprocessed_logs/
 logs/
 datasets/
+dev_datasets/
+single_dataset/
 no_matches/
 venv/
+bachelor_thesis/model/
 .venv/
 dokumentation_things/~$Roadmap Bachelor thesis.pptx
 dokumentation_things/archive/saved_weights.pt
@@ -22,5 +25,3 @@ error_log_files_raw/
 preprocess_logs.ipynb
 images/
 nones_in_csv.txt
-model/
-model/pytorch_model.bin
