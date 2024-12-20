@@ -71,9 +71,10 @@ class CustomDataset(Dataset):
 
 ############################################################# Custom Dataloader #####################################################
 class CustomDataModule:
-    def __init__(self, train_dataset_names, test_dataset_names, dir_path, batch_size=16, max_token_length=512, label_mapping="label_mapping.json"):
+    def __init__(self, train_dataset_names, val_dataset_names, test_dataset_names, dir_path, batch_size=16, max_token_length=512, label_mapping="label_mapping.json"):
         self.label_mapping = label_mapping
         self.train_dataset_names = train_dataset_names
+        self.val_dataset_names = val_dataset_names
         self.test_dataset_names = test_dataset_names
         self.dir_path = dir_path
         self.batch_size = batch_size
@@ -81,16 +82,22 @@ class CustomDataModule:
         self.tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
 
     def setup(self):
-        self.train_stream, train_stream_copy = tee(streaming_load_data_files(self.train_dataset_names, self.dir_path))
-        self.test_stream, test_stream_copy = tee(streaming_load_data_files(self.test_dataset_names, self.dir_path))
+        # Train data
+        self.train_stream = streaming_load_data_files(self.train_dataset_names, self.dir_path)
 
-        train_size = sum(1 for _ in train_stream_copy)
-        test_size = sum(1 for _ in test_stream_copy)
-        logger.info(f"Train dataset size: {train_size}")
-        logger.info(f"Test dataset size: {test_size}")
+        # Validation data
+        self.val_stream = streaming_load_data_files(self.val_dataset_names, self.dir_path)
 
+        # Test data
+        self.test_stream = streaming_load_data_files(self.test_dataset_names, self.dir_path)
+
+        logger.info("Datasets are set up for streaming.")
+
+        # Create datasets
         self.train_dataset = CustomDataset(self.train_stream, self.tokenizer, self.label_mapping, max_token_length=self.max_token_length)
+        self.val_dataset = CustomDataset(self.val_stream, self.tokenizer, self.label_mapping, max_token_length=self.max_token_length)
         self.test_dataset = CustomDataset(self.test_stream, self.tokenizer, self.label_mapping, max_token_length=self.max_token_length)
+
 
     def train_dataloader(self):
         # Reinitialize train dataset for every epoch
@@ -100,15 +107,16 @@ class CustomDataModule:
 
     def val_dataloader(self):
         # Reinitialize validation dataset for every epoch
-        self.test_stream = streaming_load_data_files(self.test_dataset_names, self.dir_path)
-        self.test_dataset = CustomDataset(self.test_stream, self.tokenizer, self.label_mapping, max_token_length=self.max_token_length)
-        return iter(self.test_dataset)
+        self.val_stream = streaming_load_data_files(self.val_dataset_names, self.dir_path)
+        self.val_dataset = CustomDataset(self.val_stream, self.tokenizer, self.label_mapping, max_token_length=self.max_token_length)
+        return iter(self.val_dataset)
 
     def test_dataloader(self):
+        # Test dataset loader
         self.test_stream = streaming_load_data_files(self.test_dataset_names, self.dir_path)
         self.test_dataset = CustomDataset(self.test_stream, self.tokenizer, self.label_mapping, max_token_length=self.max_token_length)
         return iter(self.test_dataset)
-
+    
 ############################################################# Classifier #####################################################
 class RoBERTaClassifier(nn.Module):
     def __init__(self, n_labels):

@@ -19,24 +19,29 @@ warnings.filterwarnings(
     message="The dataloader, val_dataloader 0, does not have many workers which may be a bottleneck."
 )
 
-DIR = "datasets"
-TRAIN_PERCENTAGE = 0.8
-TEST_PERCENTAGE = 0.2
+DIR = "dev_datasets_large"
 OUTPUT_DIR = "model"
+
+TRAIN_PERCENTAGE = 0.7
+VALIDATION_PERCENTAGE = 0.15
+TEST_PERCENTAGE = 0.15
 
 list_of_datasets = listdir(DIR)
 random.shuffle(list_of_datasets)
-SPLIT_CUTOFF = int(len(list_of_datasets) * TRAIN_PERCENTAGE)
 
-train_dataset_names  = list_of_datasets[:SPLIT_CUTOFF]
-test_dataset_names = list_of_datasets[SPLIT_CUTOFF:]
+train_split_cutoff = int(len(list_of_datasets) * TRAIN_PERCENTAGE)
+val_split_cutoff = int(len(list_of_datasets) * (TRAIN_PERCENTAGE + VALIDATION_PERCENTAGE))
+
+train_dataset_names = list_of_datasets[:train_split_cutoff]
+val_dataset_names = list_of_datasets[train_split_cutoff:val_split_cutoff]
+test_dataset_names = list_of_datasets[val_split_cutoff:]
 
 tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
 
 config = {
     "learning_rate": 1e-5, 
     "weight_decay": 0.01,
-    "n_epochs": 5               ,
+    "n_epochs": 1,
     "batch_size": 16            # depends on memory
 }
 
@@ -44,11 +49,13 @@ label_mapping = train_util.load_label_mapping('label_mapping.json')
 
 if __name__ == "__main__":
     # Init data module and model
-    data_module = train_util.CustomDataModule(train_dataset_names, test_dataset_names, DIR, batch_size=config["batch_size"], label_mapping=label_mapping)
+    data_module = train_util.CustomDataModule(
+        train_dataset_names, val_dataset_names, test_dataset_names, DIR, 
+        batch_size=config["batch_size"], label_mapping=label_mapping)
     data_module.setup()
     n_labels = len(label_mapping)
                                                                                                                                                                
-    print(f"Unique labels in dataset: {n_labels}")
+    # print(f"Unique labels in dataset: {n_labels}")
     model = train_util.RoBERTaClassifier(n_labels=n_labels)
 
     # Train model
@@ -63,15 +70,15 @@ if __name__ == "__main__":
     tokenizer.save_pretrained(OUTPUT_DIR)
     print("Saved model to %s" % OUTPUT_DIR)
     
-    print("Training and Validation (Predictions not implemented yet) completed")
+    print("Training and Validation completed")
 
-    # Evaluate the model on the validation set
+    # Evaluate on the test set
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    val_dataloader = data_module.val_dataloader()
-    metrics = train_util.evaluate_model(trained_model, val_dataloader, device, label_mapping)
-    
-    print("Evaluation Metrics:")
-    print(metrics["class_report"])  # Print the classification report
+    test_dataloader = data_module.test_dataloader()
+    metrics = train_util.evaluate_model(trained_model, test_dataloader, device, label_mapping)
+
+    print("\nTest Evaluation Metrics:")
+    print(metrics["class_report"])
     print(f"Macro-Average Precision: {metrics['macro_avg'][0]:.4f}")
     print(f"Macro-Average Recall: {metrics['macro_avg'][1]:.4f}")
     print(f"Macro-Average F1 Score: {metrics['macro_avg'][2]:.4f}")
