@@ -105,6 +105,8 @@ class CustomDataModule:
         return iter(self.test_dataset)
 
     def test_dataloader(self):
+        self.test_stream = streaming_load_data_files(self.test_dataset_names, self.dir_path)
+        self.test_dataset = CustomDataset(self.test_stream, self.tokenizer, self.label_mapping, max_token_length=self.max_token_length)
         return iter(self.test_dataset)
 
 ############################################################# Classifier #####################################################
@@ -129,6 +131,13 @@ class RoBERTaClassifier(nn.Module):
         model_save_path = os.path.join(save_directory, "pytorch_model.bin")
         torch.save(self.state_dict(), model_save_path)
         self.roberta.config.save_pretrained(save_directory)
+
+    @classmethod
+    def from_pretrained(cls, save_directory, n_labels):
+        model = cls(n_labels)
+        model_path = os.path.join(save_directory, "pytorch_model.bin")
+        model.load_state_dict(torch.load(model_path, map_location=torch.device("cuda" if torch.cuda.is_available() else "cpu")))
+        return model
 
 ############################################################# Training loop #####################################################
 def train_model(model, data_module, config):
@@ -190,6 +199,55 @@ def train_model(model, data_module, config):
         scheduler.step()
 
     return model
+
+###########################################################################################################
+from sklearn.metrics import classification_report, accuracy_score, precision_recall_fscore_support
+
+def evaluate_model(model, dataloader, device, label_mapping):
+    model.eval()
+    all_preds = []
+    all_labels = []
+    
+    # Reverse label mapping to map indices back to label names
+    idx_to_label = {v: k for k, v in label_mapping.items()}
+    
+    with torch.no_grad():
+        for example in dataloader:
+            batch = {k: v.to(device) for k, v in example.items()}
+            _, logits = model(batch["input_ids"], batch["attention_mask"])
+            
+            # Get predicted class indices and true labels
+            preds = torch.argmax(logits, dim=1).cpu().numpy()
+            labels = batch["labels"].cpu().numpy()
+            
+            all_preds.extend(preds)
+            all_labels.extend(labels)
+    
+    # Find unique classes in predictions and labels
+    unique_classes = sorted(set(all_labels) | set(all_preds))
+    unique_class_names = [idx_to_label[i] for i in unique_classes]
+    
+    # Calculate metrics
+    accuracy = accuracy_score(all_labels, all_preds)
+    precision, recall, f1, _ = precision_recall_fscore_support(all_labels, all_preds, labels=unique_classes, average=None)
+    macro_avg = precision_recall_fscore_support(all_labels, all_preds, labels=unique_classes, average='macro')
+    weighted_avg = precision_recall_fscore_support(all_labels, all_preds, labels=unique_classes, average='weighted')
+
+    # Classification report (text format)
+    class_report = classification_report(all_labels, all_preds, target_names=unique_class_names, labels=unique_classes, zero_division=0)
+
+    # Consolidate metrics into a dictionary
+    metrics_report = {
+        "accuracy": accuracy,
+        "precision_per_class": precision,
+        "recall_per_class": recall,
+        "f1_per_class": f1,
+        "macro_avg": macro_avg,
+        "weighted_avg": weighted_avg,
+        "class_report": class_report
+    }
+    
+    return metrics_report
 
 
 # Training config

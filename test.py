@@ -1,21 +1,12 @@
-import numpy as np
-import random
 import os
 import torch
 import warnings
-import train_util
-
-import torch.nn as nn
+from train_util import load_label_mapping, CustomDataModule, RoBERTaClassifier, logger
 import json
-import torch.optim as optim
 
 from os import listdir
-from datasets import load_dataset
 from transformers import RobertaTokenizer
-from torch.utils.data import Dataset
-from transformers import AutoModel
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
-from torch.optim.lr_scheduler import CosineAnnealingLR
 from transformers import logging as transformers_logging
 
 # Suppress warnings
@@ -25,47 +16,63 @@ warnings.filterwarnings(
     'ignore',
     message="The dataloader, val_dataloader 0, does not have many workers which may be a bottleneck."
 )
-LIST_OF_DATASETS = listdir("/home/q524745/bachelor_thesis/ten_ds")
-DIR = "ten_ds"  ## TODO change
-TRAIN_PERCENTAGE = 0.8
-TEST_PERCENTAGE = 0.2
 
-random.shuffle(LIST_OF_DATASETS)
 
-SPLIT_CUTOFF = int(len(LIST_OF_DATASETS) * TRAIN_PERCENTAGE)
-
-train_dataset_names  = LIST_OF_DATASETS[:SPLIT_CUTOFF]
-test_dataset_names = LIST_OF_DATASETS[SPLIT_CUTOFF:]
-
-tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
-
-config = {
-    "learning_rate": 1e-5, 
-    "weight_decay": 0.01,
-    "n_epochs": 1,
-    "batch_size": 16            # depends on memory
-}
-
-def predict_on_testdata(model, data_module):
+def test_model(saved_model_dir, data_module, label_mapping):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # Load the model
+    model = RoBERTaClassifier.from_pretrained(saved_model_dir, n_labels=len(label_mapping))
     model.to(device)
     model.eval()
 
     predictions = []
-    test_stream = data_module.test_dataloader()
+    ground_truths = []
+    dataloader = data_module.test_dataloader()
 
     with torch.no_grad():
-        for example in test_stream:
-            batch = {k: v.to(device) for k, v, in example.items()}            
-            loss, logits = model(batch["input_ids"], batch["attention_mask"])       
-            predictions.append(torch.argmax(logits, dim=1).cpu().numpy())               # TODO HUH?
+        for example in dataloader:
+            batch = {k: v.to(device) for k, v in example.items()}
+            logits = model(batch["input_ids"], batch["attention_mask"])[1]
+            pred_labels = torch.argmax(logits, dim=1).cpu().numpy()
+            true_labels = batch["labels"].cpu().numpy()
 
-    return np.concatenate(predictions)
+            predictions.extend(pred_labels)
+            ground_truths.extend(true_labels)
 
-# Run
-data_module = train_util.CustomDataModule(train_dataset_names,test_dataset_names, DIR, batch_size=config["batch_size"])
-data_module.setup()
-model= 0    # TODO load saved model  
-predictions = predict_on_testdata(model, data_module)
+    # Calculate metrics
+    accuracy = accuracy_score(ground_truths, predictions)
+    f1 = f1_score(ground_truths, predictions, average="weighted")
+    precision = precision_score(ground_truths, predictions, average="weighted")
+    recall = recall_score(ground_truths, predictions, average="weighted")
 
-# TODO Evaluation? Welche Metrik?
+    logger.info(f"Test Accuracy: {accuracy:.4f}")
+    logger.info(f"Test F1 Score: {f1:.4f}")
+    logger.info(f"Test Precision: {precision:.4f}")
+    logger.info(f"Test Recall: {recall:.4f}")
+
+    # Save predictions to a file
+    with open("predictions.json", "w") as f:
+        json.dump({"predictions": predictions, "ground_truths": ground_truths}, f, indent=4)
+
+if __name__ == "__main__":
+    # Load label mapping
+    label_mapping = load_label_mapping("label_mapping.json")
+    
+    DIR = "single_dataset"
+    list_of_datasets = listdir(DIR)
+
+    # Initialize data module for testing
+    data_module = CustomDataModule(
+        train_dataset_names=[],  # No training needed
+        test_dataset_names= list_of_datasets,  # Test dataset with same structure as train
+        dir_path=DIR,
+        label_mapping=label_mapping
+    )
+    data_module.setup()
+
+    # Directory where the model was saved
+    saved_model_dir = "model" 
+
+    # Test the model
+    test_model(saved_model_dir=saved_model_dir, data_module=data_module, label_mapping=label_mapping)

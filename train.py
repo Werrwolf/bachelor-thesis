@@ -4,6 +4,7 @@ import os
 import warnings
 import train_util
 import json
+import torch
 
 from os import listdir
 from transformers import RobertaTokenizer
@@ -18,7 +19,7 @@ warnings.filterwarnings(
     message="The dataloader, val_dataloader 0, does not have many workers which may be a bottleneck."
 )
 
-DIR = "dev_datasets"
+DIR = "datasets"
 TRAIN_PERCENTAGE = 0.8
 TEST_PERCENTAGE = 0.2
 OUTPUT_DIR = "model"
@@ -35,7 +36,7 @@ tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
 config = {
     "learning_rate": 1e-5, 
     "weight_decay": 0.01,
-    "n_epochs": 2,
+    "n_epochs": 5               ,
     "batch_size": 16            # depends on memory
 }
 
@@ -46,7 +47,7 @@ if __name__ == "__main__":
     data_module = train_util.CustomDataModule(train_dataset_names, test_dataset_names, DIR, batch_size=config["batch_size"], label_mapping=label_mapping)
     data_module.setup()
     n_labels = len(label_mapping)
-
+                                                                                                                                                               
     print(f"Unique labels in dataset: {n_labels}")
     model = train_util.RoBERTaClassifier(n_labels=n_labels)
 
@@ -62,8 +63,17 @@ if __name__ == "__main__":
     tokenizer.save_pretrained(OUTPUT_DIR)
     print("Saved model to %s" % OUTPUT_DIR)
     
-    # TODO Predict on test set
-    # predictions = predict_on_testdata(trained_model, data_module)
-    # print(f"Predictions on test set: {predictions}")
     print("Training and Validation (Predictions not implemented yet) completed")
+
+    # Evaluate the model on the validation set
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    val_dataloader = data_module.val_dataloader()
+    metrics = train_util.evaluate_model(trained_model, val_dataloader, device, label_mapping)
+    
+    print("Evaluation Metrics:")
+    print(metrics["class_report"])  # Print the classification report
+    print(f"Macro-Average Precision: {metrics['macro_avg'][0]:.4f}")
+    print(f"Macro-Average Recall: {metrics['macro_avg'][1]:.4f}")
+    print(f"Macro-Average F1 Score: {metrics['macro_avg'][2]:.4f}")
+    print(f"Weighted F1 Score: {metrics['weighted_avg'][2]:.4f}")
     
